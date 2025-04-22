@@ -7,15 +7,37 @@ export default class abertura extends Phaser.Scene {
   init () { }
 
   preload () {
-    this.load.image('fundo', 'assets/fundo.png')
+    this.load.image('background', 'assets/background.png')
+    this.load.spritesheet('botao', 'assets/botao.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
   }
 
   create () {
-    this.add.image(400, 225, 'fundo')
+    this.add.image(400, 190, 'background')
+
+
+    this.anims.create({
+      key: 'botao',
+      frames: this.anims.generateFrameNumbers('botao', { start: 0, end: 7 }),
+      frameRate: 30,
+    })
+
+    // botão para iniciar o jogo
+
+    this.botao = this.physics.add.sprite(400, 400, 'botao')
+
+    this.botao
       .setInteractive()
       .on('pointerdown', () => {
-        this.scene.start('precarregamento')
+        this.botao.play('botao')
       })
+
+    this.botao.on('animationcomplete', () => {
+      this.scene.stop()
+      this.scene.start('precarregamento')
+    })
   }
 
   update () { }
