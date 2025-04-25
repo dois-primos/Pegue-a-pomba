@@ -5,9 +5,10 @@
     "globals": "^16.0.0"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "phaser": "^3.88.2"
   },
-"scripts": {
- "start": "node servidor.js"
-} 
+  "scripts": {
+    "start": "node servidor.js"
+  }
 }

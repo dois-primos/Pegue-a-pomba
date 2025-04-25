@@ -15,7 +15,6 @@ class Game extends Phaser.Game {
   constructor () {
     super(config);
     this.scene.add('abertura', abertura)
-    this.scene.start('abertura')
     this.scene.add('precarregamento', precarregamento)
     this.scene.add('sala', sala)
     this.scene.add('fase1', fase1)
@@ -25,6 +24,8 @@ class Game extends Phaser.Game {
     this.scene.add('fase4', fase4)
     this.scene.add('FinalFeliz', FinalFeliz)
     this.scene.add('gameover', gameover)
+
+    this.scene.start('fase1')
   }
 }
 window.onload = () => {
