@@ -1,85 +1,102 @@
 export default class fase1 extends Phaser.Scene {
   constructor () {
     super('fase1');
-
-    this.speed = 200
+    this.speed = 200;
+    this.score = 0; // Inicializa a pontuação
   }
 
   init () { }
 
   preload () {
     this.load.audio('fire', 'assets/fire.mp3');
-
-    this.load.spritesheet('alien', 'assets/alien.png', {
-      frameWidth: 64,
-      frameHeight: 64
-    });
-
-    this.load.spritesheet('botao', 'assets/botao.png', {
-      frameWidth: 64,
-      frameHeight: 64
-    });
-
+    this.load.image('mira', 'assets/mira.png');
     this.load.image('background', 'assets/background.png');
+    this.load.image('passaro', 'assets/passaro.png');
   }
 
   create () {
+    this.add.image(400, 190, 'background');
     this.fire = this.sound.add('fire');
 
-    // Criando o alien
-    this.alien = this.physics.add.sprite(100, 100, 'alien');
-    this.alien.setCollideWorldBounds(true); // Impede que o alien saia da tela
+    // Mira
+    this.mira = this.physics.add.sprite(100, 100, 'mira');
+    this.mira.setCollideWorldBounds(true);
 
-    // Animação para andar para a direita
-    this.anims.create({
-      key: 'andar-direita',
-      frames: this.anims.generateFrameNumbers('alien', { start: 260, end: 267 }),
-      frameRate: 10,
-      repeat: -1
+    // Grupos
+    this.passaros = this.physics.add.group();
+    this.tempoParaNovoPassaro = 0;
+
+    // Criar pássaros
+    this.spawnPassaro = () => {
+      const y = Phaser.Math.Between(50, 550);
+      const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+      const x = direcao === 1 ? -50 : 850;
+
+      const passaro = this.passaros.create(x, y, 'passaro');
+      passaro.setVelocityX(Phaser.Math.Between(100, 200) * direcao);
+      passaro.direcao = direcao;
+      passaro.setCollideWorldBounds(false);
+    };
+
+    // Texto para exibir a pontuação
+    this.scoreText = this.add.text(16, 16, 'Pontuação: 0', {
+      fontSize: '32px',
+      fill: '#fff',
     });
 
-    // Criando o botão
-    this.botao = this.physics.add.sprite(400, 400, 'botao');
-
-    // Animação para o botão
-    this.anims.create({
-      key: 'botao',
-      frames: this.anims.generateFrameNumbers('botao', { start: 0, end: 7 }),
-      frameRate: 30,
-    });
-
-    // Inicializar gamepad
-    this.gamepad = null;
-  }
-
-  update () {
-    // Verificar se o gamepad está conectado
-    if (this.input.gamepad.total > 0) {
-      // Obtém o primeiro gamepad
-      const pad = this.input.gamepad.getPad(0);
-
-      // Movimentação horizontal (eixo X)
-      const axisH = pad.axes[0].getValue();
-      // Movimentação vertical (eixo Y)
-      const axisV = pad.axes[1].getValue();
-
-      // Atualizar a posição do alien com base nos eixos
-      this.alien.setVelocityX(this.speed * axisH); // Velocidade horizontal
-      this.alien.setVelocityY(this.speed * axisV); // Velocidade vertical
+    // Gamepad
+    this.input.gamepad.once('connected', (pad) => {
+      this.gamepad = pad;
 
       pad.on('down', (index) => {
-        // Botão 9 == (re)start
+        console.log(index)
+
+        // Reiniciar fase
         if (index === 9) {
-          this.scene.stop()
+          this.scene.stop();
           this.scene.start('abertura');
         }
-
-        // Botão 2 == tiro
-        if (index === 2) {
-          this.fire.play();
-        }
       });
+    });
+  }
+
+  update (time, delta) {
+    if (this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      const axisH = pad.axes[0].getValue();
+      const axisV = pad.axes[1].getValue();
+
+      // Movimenta a mira
+      this.mira.setVelocityX(this.speed * axisH);
+      this.mira.setVelocityY(this.speed * axisV);
     }
-    // this.speed += 0.1
+
+    // Gera novos pássaros
+    this.tempoParaNovoPassaro += delta;
+    if (this.tempoParaNovoPassaro > 1500) {
+      this.tempoParaNovoPassaro = 0;
+      this.spawnPassaro();
+    }
+
+    // Checar colisão manual entre tiros e pássaros
+    this.passaros.getChildren().forEach(passaro => {
+      if (
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          this.mira.getBounds(),
+          passaro.getBounds()
+        ) && this.gamepad.buttons[2].pressed) {
+        passaro.destroy();
+        this.score += 10; // Adiciona 10 pontos
+        this.scoreText.setText('Pontuação: ' + this.score); // Atualiza o texto da pontuação
+      }
+    });
+
+    // Remove pássaros fora da tela
+    this.passaros.getChildren().forEach(passaro => {
+      if ((passaro.direcao === 1 && passaro.x > 850) ||
+        (passaro.direcao === -1 && passaro.x < -50)) {
+        passaro.destroy();
+      }
+    });
   }
 }
