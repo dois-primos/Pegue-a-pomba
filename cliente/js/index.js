@@ -20,8 +20,8 @@ class Game extends Phaser.Game {
     this.scene.add('fase1', fase1)
     this.scene.add('fase2', fase2)
     this.scene.add('fase3', fase3)  
-    this.scene.add('fase5', fase5)
     this.scene.add('fase4', fase4)
+    this.scene.add('fase5', fase5)
     this.scene.add('FinalFeliz', FinalFeliz)
     this.scene.add('gameover', gameover)
 
