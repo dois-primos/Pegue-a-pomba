@@ -7,7 +7,7 @@ import fase2 from './fase2.js'
 import fase3 from './fase3.js'
 import fase4 from './fase4.js'
 import fase5 from './fase5.js'
-import FinalFeliz from './finalfeliz.js'
+import finalfeliz from './finalfeliz.js'
 import gameover from './gameover.js'
 
 
@@ -22,7 +22,7 @@ class Game extends Phaser.Game {
     this.scene.add('fase3', fase3)  
     this.scene.add('fase4', fase4)
     this.scene.add('fase5', fase5)
-    this.scene.add('FinalFeliz', FinalFeliz)
+    this.scene.add('finalfeliz', finalfeliz)
     this.scene.add('gameover', gameover)
 
     this.scene.start('fase1')

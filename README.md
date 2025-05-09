@@ -6,7 +6,7 @@ Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3]
 
 ## 📸 Captura de Tela
 
-**
+{assets/Imagem-jogo.png}
 
 ---
 
