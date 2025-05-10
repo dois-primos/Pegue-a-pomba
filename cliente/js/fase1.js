@@ -4,8 +4,8 @@ export default class fase1 extends Phaser.Scene {
     this.speed = 200;
     this.score = 0;
     this.tirosRestantes = 6;
-    this.passarosRestantes = 4; // Quantos precisam ser abatidos
-    this.maxPassaros = 4; // Limite total de pombas geradas
+    this.passarosRestantes = 4;
+    this.maxPassaros = 4;
     this.totalPassarosGerados = 0;
     this.aguardandoNovaRodada = false;
   }
@@ -34,6 +34,14 @@ export default class fase1 extends Phaser.Scene {
       repeat: -1,
     });
 
+    // Recupera pontuação acumulada
+    const scoreAnterior = this.registry.get('score') || 0;
+    this.score = scoreAnterior;
+
+    this.scoreText = this.add.text(16, 16, 'Pontuação: ' + this.score, { fontSize: '32px', fill: '#fff' });
+    this.tirosText = this.add.text(16, 60, 'Tiros: 6', { fontSize: '28px', fill: '#fff' });
+    this.rodadaText = this.add.text(400, 300, '', { fontSize: '40px', fill: '#ffff00' }).setOrigin(0.5).setDepth(1);
+
     this.spawnPassaro = () => {
       if (this.totalPassarosGerados >= this.maxPassaros) return;
 
@@ -58,12 +66,6 @@ export default class fase1 extends Phaser.Scene {
       passaro.anims.play('voar', true);
       this.totalPassarosGerados++;
     };
-
-    this.scoreText = this.add.text(16, 16, 'Pontuação: 0', { fontSize: '32px', fill: '#fff' });
-    this.tirosText = this.add.text(16, 60, 'Tiros: 6', { fontSize: '28px', fill: '#fff' });
-    this.rodadaText = this.add.text(400, 300, '', { fontSize: '40px', fill: '#ffff00' }).setOrigin(0.5).setDepth(1);
-
-    this.registry.set('score', this.score);
 
     this.input.gamepad.once('connected', (pad) => {
       this.gamepad = pad;
@@ -97,8 +99,8 @@ export default class fase1 extends Phaser.Scene {
           this.score += 10;
           this.passarosRestantes--;
           this.tirosRestantes--;
-          this.registry.set('score', this.score);
-          this.scoreText.setText('Pontuação: ' + this.registry.get('score'));
+          this.registry.set('score', this.score); // Salva no registry
+          this.scoreText.setText('Pontuação: ' + this.score);
           this.tirosText.setText('Tiros: ' + this.tirosRestantes);
           this.ultimoTiro = true;
         }
@@ -114,7 +116,6 @@ export default class fase1 extends Phaser.Scene {
       if (!botaoTiro) this.ultimoTiro = false;
     }
 
-    // Limite no número de pássaros em tela
     if (!this.aguardandoNovaRodada && this.passarosRestantes > 0) {
       this.tempoParaNovoPassaro += delta;
       if (this.tempoParaNovoPassaro > 1500) {
@@ -125,7 +126,6 @@ export default class fase1 extends Phaser.Scene {
       }
     }
 
-    // Remove os pássaros que saem da tela e reduz o contador
     this.passaros.getChildren().forEach(passaro => {
       if (passaro.x < -60 || passaro.x > 860 || passaro.y < -60 || passaro.y > 600) {
         if (!passaro.acertado) {
@@ -135,7 +135,6 @@ export default class fase1 extends Phaser.Scene {
       }
     });
 
-    // Verifica fim da fase
     if (this.passarosRestantes === 0 && this.tirosRestantes >= 0 && !this.aguardandoNovaRodada) {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText('Fase Completa!');
