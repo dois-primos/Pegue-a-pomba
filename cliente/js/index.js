@@ -14,6 +14,13 @@ import gameover from './gameover.js'
 class Game extends Phaser.Game {
   constructor () {
     super(config);
+
+    this.socket = io();
+
+    this.socket.on("connect", () => {
+      console.log('Usuário ${this.socket.id} conectado no servidor');
+    });
+
     this.scene.add('abertura', abertura)
     this.scene.add('precarregamento', precarregamento)
     this.scene.add('sala', sala)
@@ -25,7 +32,7 @@ class Game extends Phaser.Game {
     this.scene.add('finalfeliz', finalfeliz)
     this.scene.add('gameover', gameover)
 
-    this.scene.start('fase1')
+    this.scene.start('sala')
   }
 }
 window.onload = () => {
