@@ -1,3 +1,5 @@
+/*global Phaser, io*/
+/*eslint no-undef: "error"*/
 import config from "./config.js";
 import abertura from "./abertura.js";
 import precarregamento from "./precarregamento.js";
@@ -17,6 +19,9 @@ class Game extends Phaser.Game {
     this.audio = document.querySelector("audio");
     this.iceServers = {
       iceServers: [
+        {
+          urls: "stun:feira-de-jogos.dev.br",
+        },
         {
           urls: "stun:stun.l.google.com:19302",
         },

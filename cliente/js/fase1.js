@@ -1,5 +1,5 @@
 export default class fase1 extends Phaser.Scene {
-  constructor() {
+  constructor () {
     super("fase1");
     this.speed = 200;
     this.score = 0;
@@ -10,7 +10,7 @@ export default class fase1 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  preload() {
+  preload () {
     "";
     this.load.audio("fire", "assets/fire.mp3");
     this.load.image("mira", "assets/mira.png");
@@ -32,7 +32,7 @@ export default class fase1 extends Phaser.Scene {
     });
   }
 
-  create() {
+  create () {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
     this.mira = this.physics.add
@@ -69,23 +69,115 @@ export default class fase1 extends Phaser.Scene {
       frameRate: 1,
     });
 
-    if (globalThis.game.jogadores.primeiro === globalThis.game.socket.id) {
-      globalThis.game.remoteConnection = new RTCPeerConnection(
-        globalThis.game.iceServers
+    if (this.game.jogadores.primeiro === this.game.socket.id) {
+      this.game.remoteConnection = new RTCPeerConnection(this.game.iceServers);
+      this.game.dadosJogo = this.game.remoteConnection.createDataChannel(
+        "dadosJogo",
+        { negotiated: true, id: 0 },
       );
-      globalThis.game.dadosJogo =
-        globalThis.game.remoteConnection.createDataChannel("dadosJogo", {
+
+      this.game.remoteConnection.onicecandidate = ({ candidate }) => {
+        candidate &&
+          this.game.socket.emit("candidate", this.game.sala, candidate);
+      };
+
+      this.game.remoteConnection.ontrack = ({ streams: [stream] }) => {
+        this.game.audio.srcObject = stream;
+      };
+
+      if (this.game.midias) {
+        this.game.midias
+          .getTracks()
+          .forEach((track) =>
+            this.game.remoteConnection.addTrack(track, this.game.midias),
+          );
+      }
+
+      this.game.socket.on("offer", (description) => {
+        this.game.remoteConnection
+          .setRemoteDescription(description)
+          .then(() => this.game.remoteConnection.createAnswer())
+          .then((answer) =>
+            this.game.remoteConnection.setLocalDescription(answer),
+          )
+          .then(() =>
+            this.game.socket.emit(
+              "answer",
+              this.game.sala,
+              this.game.remoteConnection.localDescription,
+            ),
+          );
+      });
+
+      this.game.socket.on("candidate", (candidate) => {
+        this.game.remoteConnection.addIceCandidate(candidate);
+      });
+
+      this.personagemLocal = this.physics.add.sprite(100, 100, "mira");
+      //this.personagemRemoto = this.add.sprite(100, 150, "mira")
+    } else if (this.game.jogadores.segundo === this.game.socket.id) {
+      this.game.localConnection = new RTCPeerConnection(this.game.iceServers);
+      this.game.dadosJogo = this.game.localConnection.createDataChannel(
+        "dadosJogo",
+        {
           negotiated: true,
           id: 0,
-        });
-
-      this.personagemLocal = this.physics.add.sprite(100, 100, "mira.png");
-      this.personagemRemoto = this.physics.add.sprite(
-        100,
-        150,
-        "this.mira.png"
+        },
       );
+
+      this.game.localConnection.onicecandidate = ({ candidate }) => {
+        this.game.socket.emit("candidate", this.game.sala, candidate);
+      };
+
+      this.game.localConnection.ontrack = ({ streams: [stream] }) => {
+        this.game.audio.srcObject = stream;
+      };
+
+      if (this.game.midias) {
+        this.game.midias
+          .getTracks()
+          .forEach((track) =>
+            this.game.localConnection.addTrack(track, this.game.midias),
+          );
+      }
+
+      this.game.localConnection
+        .createOffer()
+        .then((offer) => this.game.localConnection.setLocalDescription(offer))
+        .then(() =>
+          this.game.socket.emit(
+            "offer",
+            this.game.sala,
+            this.game.localConnection.localDescription,
+          ),
+        );
+
+      this.game.socket.on("answer", (description) => {
+        this.game.localConnection.setRemoteDescription(description);
+      });
+
+      this.game.socket.on("candidate", (candidate) => {
+        this.game.localConnection.addIceCandidate(candidate);
+      });
+
+      this.personagemLocal = this.physics.add.sprite(100, 100, "mira");
+      //this.personagemRemoto = this.add.sprite(100, 150, "mira");
     }
+
+
+
+    this.game.dadosJogo.onopen = () => {
+      console.log("Conexão de dados aberta");
+    }
+    this.game.dadosJogo.onmessage = (event) => {
+      const dados = JSON.parse(event.data);
+      if (dados.persongem) {
+        this.personagemRemoto.X = dados.personagem.x;
+        this.personagemRemoto.Y = dados.personagem.y;
+        this.personagemRemoto.setFrame(dados.personagem.frame);
+      }
+    };
+
 
     const scoreAnterior = this.registry.get("score") || 0;
     this.score = scoreAnterior;
@@ -139,7 +231,7 @@ export default class fase1 extends Phaser.Scene {
     });
   }
 
-  update(time, delta) {
+  update (time, delta) {
     if (
       this.input.gamepad &&
       this.input.gamepad.total > 0 &&
@@ -236,8 +328,27 @@ export default class fase1 extends Phaser.Scene {
     }
   }
 
-  irParaFase2() {
+  irParaFase2 () {
     this.scene.stop("fase1");
     this.scene.start("fase2");
   }
+
+  try {
+  if (this.game.dadosJogo.readyState === "open") {
+    if (this.personagemLocal) {
+      this.game.dadosJogo.send(
+        JSON.stringify({
+          personagem: {
+            x: this.personagemLocal.x,
+            y: this.personagemLocal.y,
+            frame: this.personagemLocal.frame.name,
+          },
+        }),
+      );
+    }
+  }
+} catch (error) {
+  console.error(error);
 }
+}
+
