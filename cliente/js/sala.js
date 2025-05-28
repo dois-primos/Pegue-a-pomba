@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class sala extends Phaser.Scene {
   constructor() {
     super("sala");

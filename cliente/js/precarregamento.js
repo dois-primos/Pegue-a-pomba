@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class precarregamento extends Phaser.Scene {
   constructor() {
     super("precarregamento");

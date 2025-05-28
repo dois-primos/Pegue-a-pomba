@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class fase2 extends Phaser.Scene {
   constructor() {
     super("fase2");

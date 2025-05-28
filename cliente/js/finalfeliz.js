@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class finalfeliz extends Phaser.Scene {
   constructor() {
     super("finalfeliz");
@@ -19,7 +21,7 @@ export default class finalfeliz extends Phaser.Scene {
     this.happyMusic.play({ loop: true });
 
     // Texto que irá permitir ao jogador voltar para o menu ou reiniciar o jogo
-    const voltarMenu = this.add
+    this.add
       .text(250, 400, "Pressione ENTER para voltar ao menu", {
         fontSize: "32px",
         fill: "#fff",
