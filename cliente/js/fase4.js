@@ -1,6 +1,6 @@
 export default class fase4 extends Phaser.Scene {
-  constructor () {
-    super('fase4');
+  constructor() {
+    super("fase4");
     this.speed = 200;
     this.score = 0;
     this.tirosRestantes = 12;
@@ -10,49 +10,57 @@ export default class fase4 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  preload () {
-    this.load.audio('fire', 'assets/fire.mp3');
-    this.load.image('mira', 'assets/mira.png');
-    this.load.image('background', 'assets/background.png');
-    this.load.spritesheet('pomba-branca', 'assets/pomba-branca.png', {
+  preload() {
+    this.load.audio("fire", "assets/fire.mp3");
+    this.load.image("mira", "assets/mira.png");
+    this.load.image("background", "assets/background.png");
+    this.load.spritesheet("pomba-branca", "assets/pomba-branca.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-    this.load.spritesheet('pomba-cinza', 'assets/pomba-cinza.png', {
+    this.load.spritesheet("pomba-cinza", "assets/pomba-cinza.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-    this.load.spritesheet('corvo', 'assets/corvo.png', {
+    this.load.spritesheet("corvo", "assets/corvo.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
   }
 
-  create () {
-    this.add.image(400, 190, 'background');
-    this.fire = this.sound.add('fire');
-    this.mira = this.physics.add.sprite(100, 100, 'mira').setCollideWorldBounds(true);
+  create() {
+    this.add.image(400, 190, "background");
+    this.fire = this.sound.add("fire");
+    this.mira = this.physics.add
+      .sprite(100, 100, "mira")
+      .setCollideWorldBounds(true);
     this.passaros = this.physics.add.group();
     this.tempoParaNovoPassaro = 0;
 
     // Criação de animações
     this.anims.create({
-      key: 'voar-branca',
-      frames: this.anims.generateFrameNumbers('pomba-branca', { start: 0, end: 5 }),
+      key: "voar-branca",
+      frames: this.anims.generateFrameNumbers("pomba-branca", {
+        start: 0,
+        end: 5,
+      }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'voar-cinza',
-      frames: this.anims.generateFrameNumbers('pomba-cinza', { start: 0, end: 5 }),
+      key: "voar-cinza",
+      frames: this.anims.generateFrameNumbers("pomba-cinza", {
+        start: 0,
+        end: 5,
+      }),
       frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: 'voar-corvo',
-      frames: this.anims.generateFrameNumbers('corvo', { start: 0, end: 5 }),
+      key: "voar-corvo",
+      frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
       frameRate: 10,
       repeat: -1,
     });
@@ -71,15 +79,23 @@ export default class fase4 extends Phaser.Scene {
       const x = direcao === 1 ? -50 : 850;
 
       // Escolher aleatoriamente entre pomba branca, cinza ou corvo
-      const tipoPassaro = Phaser.Math.Between(0, 2) === 0 ? 'pomba-branca' :
-        Phaser.Math.Between(0, 1) === 0 ? 'pomba-cinza' : 'corvo';
-      const animacao = tipoPassaro === 'pomba-branca' ? 'voar-branca' :
-        tipoPassaro === 'pomba-cinza' ? 'voar-cinza' : 'voar-corvo';
+      const tipoPassaro =
+        Phaser.Math.Between(0, 2) === 0
+          ? "pomba-branca"
+          : Phaser.Math.Between(0, 1) === 0
+            ? "pomba-cinza"
+            : "corvo";
+      const animacao =
+        tipoPassaro === "pomba-branca"
+          ? "voar-branca"
+          : tipoPassaro === "pomba-cinza"
+            ? "voar-cinza"
+            : "voar-corvo";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80)
+        Phaser.Math.Between(-80, 80),
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -90,31 +106,40 @@ export default class fase4 extends Phaser.Scene {
     };
 
     // Inicialização de variáveis
-    this.score = this.registry.get('score') || 0;
-    this.scoreText = this.add.text(16, 16, 'Pontuação: ' + this.score, { fontSize: '32px', fill: '#fff' });
-    this.tirosText = this.add.text(16, 60, 'Tiros: ' + this.tirosRestantes, { fontSize: '28px', fill: '#fff' });
-    this.rodadaText = this.add.text(400, 300, '', { fontSize: '40px', fill: '#ffff00' }).setOrigin(0.5).setDepth(1);
+    this.score = this.registry.get("score") || 0;
+    this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
+      fontSize: "32px",
+      fill: "#fff",
+    });
+    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
+      fontSize: "28px",
+      fill: "#fff",
+    });
+    this.rodadaText = this.add
+      .text(400, 300, "", { fontSize: "40px", fill: "#ffff00" })
+      .setOrigin(0.5)
+      .setDepth(1);
 
     // Função para atualizar pontuação
     this.atualizarPontuacao = (valor) => {
       this.score += valor;
-      this.registry.set('score', this.score);
-      this.scoreText.setText('Pontuação: ' + this.score);
+      this.registry.set("score", this.score);
+      this.scoreText.setText("Pontuação: " + this.score);
     };
 
     // Controle de gamepad (sem alterações)
-    this.input.gamepad.once('connected', (pad) => {
+    this.input.gamepad.once("connected", (pad) => {
       this.gamepad = pad;
-      pad.on('down', (index) => {
+      pad.on("down", (index) => {
         if (index === 9) {
           this.scene.stop();
-          this.scene.start('abertura');
+          this.scene.start("abertura");
         }
       });
     });
   }
 
-  update (time, delta) {
+  update(time, delta) {
     if (this.input.gamepad.total > 0 && !this.aguardandoNovaRodada) {
       const pad = this.input.gamepad.getPad(0);
       const axisH = pad.axes[0].getValue();
@@ -123,23 +148,30 @@ export default class fase4 extends Phaser.Scene {
 
       this.mira.setVelocity(this.speed * axisH, this.speed * axisV);
 
-      this.passaros.getChildren().forEach(passaro => {
+      this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
-          this.mira.getBounds(), passaro.getBounds()
+          this.mira.getBounds(),
+          passaro.getBounds(),
         );
 
-        if (colidiu && botaoTiro && !this.ultimoTiro && !passaro.acertado && this.tirosRestantes > 0) {
+        if (
+          colidiu &&
+          botaoTiro &&
+          !this.ultimoTiro &&
+          !passaro.acertado &&
+          this.tirosRestantes > 0
+        ) {
           passaro.acertado = true;
           passaro.destroy();
           this.fire.play();
-          if (passaro.texture.key === 'corvo') {
+          if (passaro.texture.key === "corvo") {
             this.atualizarPontuacao(-5); // Perde pontos ao acertar o corvo
           } else {
             this.atualizarPontuacao(10); // Pontuação normal para as pombas
           }
           this.passarosRestantes--;
           this.tirosRestantes--;
-          this.tirosText.setText('Tiros: ' + this.tirosRestantes);
+          this.tirosText.setText("Tiros: " + this.tirosRestantes);
           this.ultimoTiro = true;
         }
       });
@@ -147,7 +179,7 @@ export default class fase4 extends Phaser.Scene {
       if (botaoTiro && !this.ultimoTiro && this.tirosRestantes > 0) {
         this.fire.play();
         this.tirosRestantes--;
-        this.tirosText.setText('Tiros: ' + this.tirosRestantes);
+        this.tirosText.setText("Tiros: " + this.tirosRestantes);
         this.ultimoTiro = true;
       }
 
@@ -166,8 +198,13 @@ export default class fase4 extends Phaser.Scene {
     }
 
     // Remove os pássaros que saem da tela e reduz o contador
-    this.passaros.getChildren().forEach(passaro => {
-      if (passaro.x < -60 || passaro.x > 860 || passaro.y < -60 || passaro.y > 600) {
+    this.passaros.getChildren().forEach((passaro) => {
+      if (
+        passaro.x < -60 ||
+        passaro.x > 860 ||
+        passaro.y < -60 ||
+        passaro.y > 600
+      ) {
         if (!passaro.acertado) {
           this.passarosRestantes--;
         }
@@ -176,17 +213,21 @@ export default class fase4 extends Phaser.Scene {
     });
 
     // Verifica fim da fase
-    if (this.passarosRestantes === 0 && this.tirosRestantes >= 0 && !this.aguardandoNovaRodada) {
+    if (
+      this.passarosRestantes === 0 &&
+      this.tirosRestantes >= 0 &&
+      !this.aguardandoNovaRodada
+    ) {
       this.aguardandoNovaRodada = true;
-      this.rodadaText.setText('Fase Completa!');
+      this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
         this.irParaFase5();
       });
     }
   }
 
-  irParaFase5 () {
-    this.scene.stop('fase4');
-    this.scene.start('fase5');
+  irParaFase5() {
+    this.scene.stop("fase4");
+    this.scene.start("fase5");
   }
 }

@@ -1,5 +1,5 @@
 export default class fase1 extends Phaser.Scene {
-  constructor () {
+  constructor() {
     super("fase1");
     this.speed = 200;
     this.score = 0;
@@ -10,8 +10,7 @@ export default class fase1 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  preload () {
-    "";
+  preload() {
     this.load.audio("fire", "assets/fire.mp3");
     this.load.image("mira", "assets/mira.png");
     this.load.image("background", "assets/background.png");
@@ -32,7 +31,7 @@ export default class fase1 extends Phaser.Scene {
     });
   }
 
-  create () {
+  create() {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
     this.mira = this.physics.add
@@ -164,11 +163,9 @@ export default class fase1 extends Phaser.Scene {
       //this.personagemRemoto = this.add.sprite(100, 150, "mira");
     }
 
-
-
     this.game.dadosJogo.onopen = () => {
       console.log("Conexão de dados aberta");
-    }
+    };
     this.game.dadosJogo.onmessage = (event) => {
       const dados = JSON.parse(event.data);
       if (dados.persongem) {
@@ -177,7 +174,6 @@ export default class fase1 extends Phaser.Scene {
         this.personagemRemoto.setFrame(dados.personagem.frame);
       }
     };
-
 
     const scoreAnterior = this.registry.get("score") || 0;
     this.score = scoreAnterior;
@@ -210,7 +206,7 @@ export default class fase1 extends Phaser.Scene {
       const passaro = this.passaros.create(x, y, "pomba-branca");
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80)
+        Phaser.Math.Between(-80, 80),
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -231,7 +227,7 @@ export default class fase1 extends Phaser.Scene {
     });
   }
 
-  update (time, delta) {
+  update(time, delta) {
     if (
       this.input.gamepad &&
       this.input.gamepad.total > 0 &&
@@ -247,7 +243,7 @@ export default class fase1 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds()
+          passaro.getBounds(),
         );
 
         if (
@@ -326,29 +322,28 @@ export default class fase1 extends Phaser.Scene {
         this.irParaFase2();
       });
     }
+
+    try {
+      if (this.game.dadosJogo.readyState === "open") {
+        if (this.personagemLocal) {
+          this.game.dadosJogo.send(
+            JSON.stringify({
+              personagem: {
+                x: this.personagemLocal.x,
+                y: this.personagemLocal.y,
+                frame: this.personagemLocal.frame.name,
+              },
+            }),
+          );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  irParaFase2 () {
+  irParaFase2() {
     this.scene.stop("fase1");
     this.scene.start("fase2");
   }
-
-  try {
-  if (this.game.dadosJogo.readyState === "open") {
-    if (this.personagemLocal) {
-      this.game.dadosJogo.send(
-        JSON.stringify({
-          personagem: {
-            x: this.personagemLocal.x,
-            y: this.personagemLocal.y,
-            frame: this.personagemLocal.frame.name,
-          },
-        }),
-      );
-    }
-  }
-} catch (error) {
-  console.error(error);
 }
-}
-

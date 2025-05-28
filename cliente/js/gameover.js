@@ -1,18 +1,13 @@
 export default class gameover extends Phaser.Scene {
-
-  constructor () {
-    super('gamerover');
+  constructor() {
+    super("gamerover");
   }
 
-  init () { }
+  init() {}
 
-  preload () { }
+  preload() {}
 
+  create() {}
 
-
-  create () { }
-
-
-
-  upfate () { }
+  upfate() {}
 }
