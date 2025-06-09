@@ -1,11 +1,14 @@
 /*global Phaser*/
 /*eslint no-undef: "error"*/
+
 export default class fase1 extends Phaser.Scene {
   constructor() {
     super("fase1");
     this.speed = 200;
     this.score = 0;
+    this.scoreRemoto = 0;
     this.tirosRestantes = 6;
+    this.botaoTiroPressionado = false;
   }
 
   preload() {
@@ -38,7 +41,7 @@ export default class fase1 extends Phaser.Scene {
       key: "voar",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
-        end: 5,
+        end: 11,
       }),
       frameRate: 10,
       repeat: -1,
@@ -78,6 +81,7 @@ export default class fase1 extends Phaser.Scene {
       passaro.anims.play("voar", true);
     }
 
+    // Conexão WebRTC
     if (this.game.jogadores.primeiro === this.game.socket.id) {
       this.game.remoteConnection = new RTCPeerConnection(this.game.iceServers);
       this.game.dadosJogo = this.game.remoteConnection.createDataChannel(
@@ -95,11 +99,9 @@ export default class fase1 extends Phaser.Scene {
       };
 
       if (this.game.midias) {
-        this.game.midias
-          .getTracks()
-          .forEach((track) =>
-            this.game.remoteConnection.addTrack(track, this.game.midias)
-          );
+        this.game.midias.getTracks().forEach((track) => {
+          this.game.remoteConnection.addTrack(track, this.game.midias);
+        });
       }
 
       this.game.socket.on("offer", (description) => {
@@ -128,7 +130,6 @@ export default class fase1 extends Phaser.Scene {
           Phaser.Math.Between(-80, 80)
         );
         passaro.setFlipX(passaro.direcao === -1);
-        ("");
       });
 
       this.personagemLocal = this.physics.add
@@ -154,11 +155,9 @@ export default class fase1 extends Phaser.Scene {
       };
 
       if (this.game.midias) {
-        this.game.midias
-          .getTracks()
-          .forEach((track) =>
-            this.game.localConnection.addTrack(track, this.game.midias)
-          );
+        this.game.midias.getTracks().forEach((track) => {
+          this.game.localConnection.addTrack(track, this.game.midias);
+        });
       }
 
       this.game.localConnection
@@ -200,19 +199,25 @@ export default class fase1 extends Phaser.Scene {
 
       if (dados.passaros) {
         dados.passaros.forEach((passaro, i) => {
-          if (this.passaros.children.entries[i]) {
-            this.passaros.children.entries[i].x = passaro.x;
-            this.passaros.children.entries[i].y = passaro.y;
-            if (!passaro.visible) {
-              this.passaros.children.entries[i].setVisible(false);
-              // recriar o pássaro
-            }
+          const p = this.passaros.children.entries[i];
+          if (p) {
+            p.x = passaro.x;
+            p.y = passaro.y;
+            p.setVisible(passaro.visible);
           }
         });
       }
 
-      if (dados.passaroAtingido) {
-        this.passaros.children.entries[dados.passaroAtingido].setVisible(false);
+      if (dados.passaroAtingido !== undefined) {
+        const p = this.passaros.children.entries[dados.passaroAtingido];
+        if (p) {
+          p.setVisible(false);
+        }
+      }
+
+      if (dados.novoScore !== undefined) {
+        this.scoreRemoto = dados.novoScore;
+        this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
       }
     };
 
@@ -224,15 +229,15 @@ export default class fase1 extends Phaser.Scene {
       fill: "#fff",
     });
 
-    this.tirosText = this.add.text(16, 60, "Tiros: 6", {
+    this.scoreRemotoText = this.add.text(16, 60, "Adversário: 0", {
       fontSize: "28px",
       fill: "#fff",
     });
 
-    this.rodadaText = this.add
-      .text(400, 300, "", { fontSize: "40px", fill: "#ffff00" })
-      .setOrigin(0.5)
-      .setDepth(1);
+    this.tirosText = this.add.text(16, 100, "Tiros: 6", {
+      fontSize: "28px",
+      fill: "#fff",
+    });
 
     this.input.gamepad.on("down", (pad) => {
       if (pad.buttons[9].pressed) {
@@ -262,19 +267,17 @@ export default class fase1 extends Phaser.Scene {
         ) {
           this.game.dadosJogo.send(
             JSON.stringify({
-              passaros: this.passaros.children.entries.map((passaro) =>
-                ((passaro) => ({
-                  x: passaro.x,
-                  y: passaro.y,
-                  visible: passaro.visible,
-                }))(passaro)
-              ),
+              passaros: this.passaros.children.entries.map((p) => ({
+                x: p.x,
+                y: p.y,
+                visible: p.visible,
+              })),
             })
           );
         }
       }
     } catch (error) {
-      // console.error(error);
+      // Silenciar erros de conexão
     }
 
     if (
@@ -287,11 +290,7 @@ export default class fase1 extends Phaser.Scene {
       const axisV = pad.axes[1].getValue();
       const botaoTiro = pad.buttons[2].pressed;
 
-      if (this.personagemLocal)
-        this.personagemLocal.setVelocity(
-          this.speed * axisH,
-          this.speed * axisV
-        );
+      this.personagemLocal.setVelocity(this.speed * axisH, this.speed * axisV);
 
       this.passaros.getChildren().forEach((passaro, i) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
@@ -299,13 +298,34 @@ export default class fase1 extends Phaser.Scene {
           passaro.getBounds()
         );
 
-        if (colidiu && botaoTiro) {
+        if (
+          colidiu &&
+          botaoTiro &&
+          !this.botaoTiroPressionado &&
+          this.tirosRestantes > 0 &&
+          passaro.visible
+        ) {
+          this.fire.play();
           passaro.setVisible(false);
-          this.game.dadosJogo.send(
-            JSON.stringify({
-              passaroAtingido: i,
-            })
-          );
+          this.tirosRestantes--;
+          this.score += 100;
+
+          this.tirosText.setText("Tiros: " + this.tirosRestantes);
+          this.scoreText.setText("Pontuação: " + this.score);
+          this.botaoTiroPressionado = true;
+
+          if (this.game.dadosJogo.readyState === "open") {
+            this.game.dadosJogo.send(
+              JSON.stringify({
+                passaroAtingido: i,
+                novoScore: this.score,
+              })
+            );
+          }
+        }
+
+        if (!botaoTiro) {
+          this.botaoTiroPressionado = false;
         }
       });
     }
