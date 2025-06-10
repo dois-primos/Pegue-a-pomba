@@ -23,6 +23,11 @@ class Game extends Phaser.Game {
           urls: "stun:feira-de-jogos.dev.br",
         },
         {
+          urls: "turn:feira-de-jogos.dev.br",
+          username: "adc20251",
+          credential: "adc20251",
+        },
+        {
           urls: "stun:stun.l.google.com:19302",
         },
       ],
