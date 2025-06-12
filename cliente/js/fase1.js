@@ -317,68 +317,68 @@ export default class fase1 extends Phaser.Scene {
         }
       }
     } catch (error) {
-      // Silenciar erros de conexão
       console.error("Erro ao enviar dados:", error);
     }
 
-    if (this.input.gamepad) {
+    // CONTROLE DO GAMEPAD
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       const axisH = pad.axes[0].getValue();
       const axisV = pad.axes[1].getValue();
       const botaoTiro = pad.buttons[2].pressed;
+
       this.personagemLocal.setVelocity(this.speed * axisH, this.speed * axisV);
 
       if (botaoTiro && !this.botaoTiroPressionado && this.tirosRestantes > 0) {
-        this.botaoTiroPressionado = true;
-        this.fire.play();
-        this.tirosRestantes--;
-        this.tirosText.setText("Tiros: " + this.tirosRestantes);
-      }
+        let acertou = false;
 
-      if (!botaoTiro && this.botaoTiroPressionado) {
-        this.botaoTiroPressionado = false;
-      }
+        this.passaros.children.entries.forEach((passaro, i) => {
+          const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
+            this.personagemLocal.getBounds(),
+            passaro.getBounds()
+          );
 
-      this.passaros.children.entries.forEach((passaro, i) => {
-        const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
-          this.personagemLocal.getBounds(),
-          passaro.getBounds()
-        );
+          if (colidiu && passaro.visible && !acertou) {
+            acertou = true;
 
-        if (
-          colidiu &&
-          botaoTiro &&
-          !this.botaoTiroPressionado &&
-          this.tirosRestantes > 0 &&
-          passaro.visible
-        ) {
-          // Para o movimento do pássaro
-          passaro.setVelocity(0, 0);
+            this.fire.play();
+            this.score += 100;
 
-          // Toca a animação de queda
-          passaro.anims.play("queda", true);
+            this.tirosText.setText("Tiros: " + this.tirosRestantes);
+            this.scoreText.setText("Pontuação: " + this.score);
 
-          // Faz o pássaro cair com velocidade para baixo
-          passaro.setVelocityY(100);
+            passaro.setVelocity(0, 0);
+            passaro.setTexture("pomba-branca-caindo");
+            passaro.anims.play("queda", true);
+            passaro.setVelocityY(100);
 
-          // Após a animação completa, remove o pássaro
-          passaro.once("animationcomplete", () => {
-            passaro.setVisible(false);
-          });
+            passaro.once("animationcomplete", () => {
+              passaro.setVisible(false);
+            });
 
-          this.score += 100;
-          this.scoreText.setText("Pontuação: " + this.score);
-
-          if (this.game.dadosJogo.readyState === "open") {
-            this.game.dadosJogo.send(
+            this.game.dadosJogo.send?.(
               JSON.stringify({
                 passaroAtingido: i,
                 novoScore: this.score,
               })
             );
           }
+        });
+
+        if (acertou) {
+          this.game.registry.set("score", this.score);
+        } else {
+          this.fire.play();
         }
-      });
+
+        this.tirosRestantes--;
+        this.tirosText.setText("Tiros: " + this.tirosRestantes);
+        this.botaoTiroPressionado = true;
+      }
+
+      if (!botaoTiro) {
+        this.botaoTiroPressionado = false;
+      }
     }
   }
 }
