@@ -7,7 +7,7 @@ export default class fase1 extends Phaser.Scene {
     this.speed = 200;
     this.score = 0;
     this.scoreRemoto = 0;
-    this.tirosRestantes = 6;
+    this.tirosRestantes = 99;
     this.botaoTiroPressionado = false;
   }
 
@@ -30,15 +30,6 @@ export default class fase1 extends Phaser.Scene {
         frameHeight: 64,
       }
     );
-
-    this.load.spritesheet(
-      "pomba-branca-caindo",
-      "assets/pomba-branca-caindo.png",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      }
-    );
   }
 
   create() {
@@ -46,22 +37,23 @@ export default class fase1 extends Phaser.Scene {
     this.fire = this.sound.add("fire");
 
     this.anims.create({
-      key: "voar",
+      key: "voar-direita",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
-        end: 11,
+        end: 5,
       }),
       frameRate: 12,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "impacto",
-      frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
-        start: 0,
-        end: 0,
+      key: "voar-esquerda",
+      frames: this.anims.generateFrameNumbers("pomba-branca", {
+        start: 6,
+        end: 11,
       }),
-      frameRate: 1,
+      frameRate: 12,
+      repeat: -1,
     });
 
     this.anims.create({
@@ -87,7 +79,6 @@ export default class fase1 extends Phaser.Scene {
 
       const passaro = this.passaros.create(x, y, "pomba-branca");
       passaro.direcao = direcao;
-      passaro.anims.play("voar", true);
     }
 
     // Conexão WebRTC
@@ -134,9 +125,9 @@ export default class fase1 extends Phaser.Scene {
       });
 
       this.personagemLocal = this.physics.add
-        .sprite(100, 100, "mira")
+        .sprite(225, 225, "mira")
         .setCollideWorldBounds(true);
-      this.personagemRemoto = this.add.sprite(700, 100, "mira-remoto");
+      this.personagemRemoto = this.add.sprite(700, -100, "mira-remoto");
 
       this.contador = this.add.text(400, 200, "5", {
         fontSize: "128px",
@@ -157,7 +148,11 @@ export default class fase1 extends Phaser.Scene {
               Phaser.Math.Between(10, 15) * passaro.direcao,
               Phaser.Math.Between(-8, 8)
             );
-            passaro.setFlipX(passaro.direcao === -1);
+            if (passaro.direcao === 1) {
+              passaro.anims.play("voar-direita", true);
+            } else {
+              passaro.anims.play("voar-esquerda", true);
+            }
           });
         }
       }, 1000);
@@ -244,6 +239,8 @@ export default class fase1 extends Phaser.Scene {
           if (p) {
             p.x = passaro.x;
             p.y = passaro.y;
+            p.setTexture(passaro.texture);
+            p.setFrame(passaro.frame);
             p.setVisible(passaro.visible);
           }
         });
@@ -251,8 +248,14 @@ export default class fase1 extends Phaser.Scene {
 
       if (dados.passaroAtingido) {
         const p = this.passaros.children.entries[dados.passaroAtingido];
-        if (p) {
-          p.setVisible(false);
+        if (p && this.game.socket.id === this.game.jogadores.primeiro) {
+          p.setVelocity(0, 0);
+          p.anims.play("queda", true);
+          p.setVelocityY(100);
+
+          p.once("animationcomplete", () => {
+            p.setVisible(false);
+          });
         }
       }
 
@@ -275,7 +278,7 @@ export default class fase1 extends Phaser.Scene {
       fill: "#fff",
     });
 
-    this.tirosText = this.add.text(16, 100, "Tiros: 6", {
+    this.tirosText = this.add.text(16, 100, "Tiros: 99", {
       fontSize: "28px",
       fill: "#fff",
     });
@@ -310,6 +313,8 @@ export default class fase1 extends Phaser.Scene {
               passaros: this.passaros.children.entries.map((p) => ({
                 x: p.x,
                 y: p.y,
+                texture: p.texture.key,
+                frame: p.frame.name,
                 visible: p.visible,
               })),
             })
@@ -347,16 +352,18 @@ export default class fase1 extends Phaser.Scene {
             this.tirosText.setText("Tiros: " + this.tirosRestantes);
             this.scoreText.setText("Pontuação: " + this.score);
 
-            passaro.setVelocity(0, 0);
-            passaro.setTexture("pomba-branca-caindo");
-            passaro.anims.play("queda", true);
-            passaro.setVelocityY(100);
+            const p = this.passaros.children.entries[i];
+            if (p && this.game.socket.id === this.game.jogadores.primeiro) {
+              p.setVelocity(0, 0);
+              p.anims.play("queda", true);
+              p.setVelocityY(100);
 
-            passaro.once("animationcomplete", () => {
-              passaro.setVisible(false);
-            });
+              p.once("animationcomplete", () => {
+                p.setVisible(false);
+              });
+            }
 
-            this.game.dadosJogo.send?.(
+            this.game.dadosJogo.send(
               JSON.stringify({
                 passaroAtingido: i,
                 novoScore: this.score,
