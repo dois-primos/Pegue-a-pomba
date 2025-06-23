@@ -14,7 +14,7 @@ Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3]
 
 - Use o JoyStick do controle para mover a mira.
 - Aperte o botão de tiro para atirar.
-- Você tem 3 tiros por rodada.
+- Você tem tiros limitados por rodada.
 - A rodada termina quando os tiros acabam e todos os pássaros saem da tela.
 - O jogo mostra a pontuação e reinicia automaticamente uma nova rodada.
 
@@ -43,7 +43,7 @@ Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3]
 ## 🚀 Como Rodar Localmente
 
 1. Clone este repositório:
-  
+
    git clone https://github.com/dois-primos/Pegue-a-pomba
    cd Pegue-a-pomba
 
@@ -53,7 +53,7 @@ Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3]
 
 3. Abra o navegador em http://localhost:8080 ou conforme indicado.
 
-4. Conecte um controle USB e comece a jogar!   
+4. Conecte um controle USB e comece a jogar!
 
 ---
 

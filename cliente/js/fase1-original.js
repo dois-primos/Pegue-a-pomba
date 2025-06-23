@@ -32,6 +32,46 @@ export default class fase1 extends Phaser.Scene {
   }
 
   create() {
+    globalThis.google.accounts.id.initialize({
+      client_id:
+        "331191695151-ku8mdhd76pc2k36itas8lm722krn0u64.apps.googleusercontent.com",
+      callback: (res) => {
+        if (res.error) {
+          console.error(res.error);
+        } else {
+          axios
+            .post(
+              "https://feira-de-jogos.dev.br/api/v2/credit",
+              {
+                product: 42, // id do jogo cadastrado no banco de dados da Feira de Jogos
+                value: 250, // crédito em tijolinhos
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${res.credential}`,
+                },
+              }
+            )
+            .then((response) => {
+              console.log("Crédito adicionado com sucesso:", response.data);
+            })
+            .catch((error) => {
+              console.error("Erro ao adicionar crédito:", error);
+            });
+        }
+      },
+      context: "https://feira-de-jogos.dev.br",
+    });
+    globalThis.google.accounts.id.prompt();
+    this.game.socket.emit("entrar-na-sala", this.game.sala);
+    this.game.socket.on("jogadores", (jogadores) => {
+      this.game.jogadores = jogadores;
+      if (jogadores.segundo) {
+        this.scene.stop("sala");
+        this.scene.start("fase1");
+      }
+    });
+
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
     this.mira = this.physics.add
