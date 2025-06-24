@@ -19,6 +19,11 @@ export default class precarregamento extends Phaser.Scene {
     this.load.setPath("assets/");
     this.load.image("background", "background.png");
     this.load.image("mira", "mira.png");
+    this.load.spritesheet("botao", "assets/botao.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+
 
   }
 

@@ -49,29 +49,97 @@ export default class fase4 extends Phaser.Scene {
 
     // Animações
     this.anims.create({
-      key: "voar-branca",
+      key: "voar-direita",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
       }),
-      frameRate: 10,
+      frameRate: 12,
       repeat: -1,
     });
+
     this.anims.create({
-      key: "voar-cinza",
+      key: "voar-esquerda",
+      frames: this.anims.generateFrameNumbers("pomba-branca", {
+        start: 6,
+        end: 11,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "queda",
+      frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: "voar-direita",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
       }),
-      frameRate: 10,
+      frameRate: 12,
       repeat: -1,
     });
+
     this.anims.create({
-      key: "voar-corvo",
-      frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
-      frameRate: 10,
+      key: "voar-esquerda",
+      frames: this.anims.generateFrameNumbers("pomba-cinza", {
+        start: 6,
+        end: 11,
+      }),
+      frameRate: 12,
       repeat: -1,
     });
+
+    this.anims.create({
+      key: "queda",
+      frames: this.anims.generateFrameNumbers("pomba-cinza-caindo", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: "voar-direita",
+      frames: this.anims.generateFrameNumbers("corvo", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "voar-esquerda",
+      frames: this.anims.generateFrameNumbers("corvo", {
+        start: 6,
+        end: 11,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "queda",
+      frames: this.anims.generateFrameNumbers("corvo-caindo", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: 0,
+    });
+
+
+    
 
     // Spawn de pássaros
     this.spawnPassaro = () => {
