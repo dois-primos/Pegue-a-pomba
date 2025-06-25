@@ -44,6 +44,11 @@ io.on("connection", (socket) => {
     socket.to(sala).emit("answer", description);
   });
 
+  socket.on("limpar-sala", (sala) => {
+    console.log(io.sockets.adapter.rooms);
+    io.socketsLeave(sala);
+  });
+
   socket.on("disconnect", () => {});
 });
 
