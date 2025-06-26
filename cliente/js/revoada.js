@@ -1,9 +1,9 @@
 /*global Phaser*/
 /*eslint no-undef: "error"*/
 
-export default class fase1 extends Phaser.Scene {
+export default class revoada extends Phaser.Scene {
   constructor() {
-    super("fase1");
+    super("revoada");
     this.speed = 200;
     this.score = 0;
     this.scoreRemoto = 0;
@@ -22,14 +22,17 @@ export default class fase1 extends Phaser.Scene {
       frameHeight: 64,
     });
 
-    this.load.spritesheet("pomba-branca-caindo", "assets/pomba-branca-caindo.png", {
+    this.load.spritesheet(
+      "pomba-branca-caindo",
+      "assets/pomba-branca-caindo.png",
+      {
         frameWidth: 64,
         frameHeight: 64,
-      });
+      }
+    );
   }
 
-  create () {
-    
+  create() {
     this.game.socket.emit("entrar-na-sala", this.game.sala);
     this.game.socket.on("jogadores", (jogadores) => {
       this.game.jogadores = jogadores;
@@ -43,7 +46,7 @@ export default class fase1 extends Phaser.Scene {
     this.fire = this.sound.add("fire");
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -73,7 +76,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -206,7 +209,9 @@ export default class fase1 extends Phaser.Scene {
           Phaser.Math.Between(-15, 15)
         );
         passaro.anims.play(
-          passaro.direcao === 1 ? "voar-direita" : "voar-esquerda",
+          passaro.direcao === 1
+            ? "voar-direita-pomba-branca"
+            : "voar-esquerda-pomba-branca",
           true
         );
       });
@@ -354,7 +359,9 @@ export default class fase1 extends Phaser.Scene {
           passaro.direcao *= -1;
           passaro.setVelocityX(passaro.direcao * Phaser.Math.Between(100, 150));
           passaro.anims.play(
-            passaro.direcao === 1 ? "voar-direita" : "voar-esquerda",
+            passaro.direcao === 1
+              ? "voar-direita-pomba-branca"
+              : "voar-esquerda-pomba-cinza",
             true
           );
         }

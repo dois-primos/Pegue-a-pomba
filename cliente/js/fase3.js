@@ -28,8 +28,7 @@ export default class fase3 extends Phaser.Scene {
     });
   }
 
-  create () {
-    
+  create() {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
     this.mira = this.physics.add
@@ -43,7 +42,7 @@ export default class fase3 extends Phaser.Scene {
     this.personagemRemoto.visible = false;
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-banca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -63,7 +62,7 @@ export default class fase3 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-branco-f3",
       frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
         start: 0,
         end: 5,
@@ -73,7 +72,7 @@ export default class fase3 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -93,7 +92,7 @@ export default class fase3 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-cinza-f3",
       frames: this.anims.generateFrameNumbers("pomba-cinza-caindo", {
         start: 0,
         end: 5,

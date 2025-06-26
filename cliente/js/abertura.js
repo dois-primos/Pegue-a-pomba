@@ -34,13 +34,14 @@ export default class abertura extends Phaser.Scene {
         this.scene.stop();
         this.scene.start("sala");
       });
-
-    this.input.gamepad.on("down", (pad) => {
-      if (pad.buttons[9].pressed) {
-        this.scene.stop();
-        this.scene.start("sala");
-      }
-    });
+    if (this.input.gamepad) {
+      this.input.gamepad.on("down", (pad) => {
+        if (pad.buttons[9].pressed) {
+          this.scene.stop();
+          this.scene.start("sala");
+        }
+      });
+    }
   }
 
   update() {}

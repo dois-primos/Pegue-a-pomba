@@ -1,19 +1,28 @@
 <!DOCTYPE html>
+<html lang="pt-br">
 
- 
 <head>
   <meta charset="UTF-8" />
-  <title>Jogo</title>
-  <link rel="stylesheet" type="text/css" href="./main.css" />
+  <title>Pegue a Pomba</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+    }
+  </style>
+
+  <!-- Bibliotecas via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-  <audio id="audio" autoplay></audio>
-  <div class="center" id="game-container"></div>
-  <script src="./js/phaser.min.js"></script>
-  <script src="./socket.io/socket.io.js"></script>
-  <script src="./js/axios.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async></script>
+  <audio hidden autoplay></audio>
+  <div id="game-container"></div>
+
+  <!-- Script principal -->
   <script type="module" src="./js/index.js"></script>
 </body>
 

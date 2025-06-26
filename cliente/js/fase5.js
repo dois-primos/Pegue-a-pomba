@@ -43,7 +43,7 @@ export default class fase5 extends Phaser.Scene {
     this.personagemRemoto = this.add.sprite(100, 100, "mira").setAlpha(0.5);
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -53,7 +53,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda",
+      key: "voar-esquerd-pomba-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 6,
         end: 11,
@@ -73,7 +73,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -103,7 +103,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-corvo",
       frames: this.anims.generateFrameNumbers("corvo", {
         start: 0,
         end: 5,
@@ -281,10 +281,10 @@ export default class fase5 extends Phaser.Scene {
       this.time.delayedCall(2000, () => {
         if (this.score >= this.scoreRemoto) {
           this.scene.stop("fase5");
-          this.scene.start("final-feliz");
+          this.scene.start("finalFeliz");
         } else {
           this.scene.stop("fase5");
-          this.scene.start("final-triste");
+          this.scene.start("gameover");
         }
       });
     }

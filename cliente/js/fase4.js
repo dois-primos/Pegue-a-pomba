@@ -49,7 +49,7 @@ export default class fase4 extends Phaser.Scene {
 
     // Animações
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -79,7 +79,7 @@ export default class fase4 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomna-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -109,7 +109,7 @@ export default class fase4 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-corvo",
       frames: this.anims.generateFrameNumbers("corvo", {
         start: 0,
         end: 5,
@@ -137,9 +137,6 @@ export default class fase4 extends Phaser.Scene {
       frameRate: 12,
       repeat: 0,
     });
-
-
-    
 
     // Spawn de pássaros
     this.spawnPassaro = () => {
@@ -203,7 +200,6 @@ export default class fase4 extends Phaser.Scene {
     });
 
     // === INÍCIO DA INTEGRAÇÃO GOOGLE IDENTITY API ===
-    // Insira o script do Google Identity no HTML para funcionar (exemplo na documentação Google)
     if (window.google && google.accounts) {
       google.accounts.id.initialize({
         client_id: "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com",
@@ -342,4 +338,3 @@ export default class fase4 extends Phaser.Scene {
     this.scene.start("fase5");
   }
 }
-

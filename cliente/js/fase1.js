@@ -31,15 +31,6 @@ export default class fase1 extends Phaser.Scene {
   }
 
   create() {
-    this.game.socket.emit("entrar-na-sala", this.game.sala);
-    this.game.socket.on("jogadores", (jogadores) => {
-      this.game.jogadores = jogadores;
-      if (jogadores.segundo) {
-        this.scene.stop("sala");
-        this.scene.start("fase1");
-      }
-    });
-
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
     this.mira = this.physics.add
@@ -49,7 +40,7 @@ export default class fase1 extends Phaser.Scene {
     this.tempoParaNovoPassaro = 0;
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-branca-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -59,17 +50,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("pomba-branca", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "queda",
+      key: "queda-branca-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
         start: 0,
         end: 5,
@@ -77,113 +58,6 @@ export default class fase1 extends Phaser.Scene {
       frameRate: 12,
       repeat: 0,
     });
-
-    if (this.game.jogadores.primeiro === this.game.socket.id) {
-      this.game.remoteConnection = new RTCPeerConnection(this.game.iceServers);
-      this.game.dadosJogo = this.game.remoteConnection.createDataChannel(
-        "dadosJogo",
-        { negotiated: true, id: 0 }
-      );
-
-      this.game.remoteConnection.onicecandidate = ({ candidate }) => {
-        candidate &&
-          this.game.socket.emit("candidate", this.game.sala, candidate);
-      };
-
-      this.game.remoteConnection.ontrack = ({ streams: [stream] }) => {
-        this.game.audio.srcObject = stream;
-      };
-
-      if (this.game.midias) {
-        this.game.midias
-          .getTracks()
-          .forEach((track) =>
-            this.game.remoteConnection.addTrack(track, this.game.midias)
-          );
-      }
-
-      this.game.socket.on("offer", (description) => {
-        this.game.remoteConnection
-          .setRemoteDescription(description)
-          .then(() => this.game.remoteConnection.createAnswer())
-          .then((answer) =>
-            this.game.remoteConnection.setLocalDescription(answer)
-          )
-          .then(() =>
-            this.game.socket.emit(
-              "answer",
-              this.game.sala,
-              this.game.remoteConnection.localDescription
-            )
-          );
-      });
-
-      this.game.socket.on("candidate", (candidate) => {
-        this.game.remoteConnection.addIceCandidate(candidate);
-      });
-
-      this.personagemLocal = this.physics.add.sprite(100, 100, "mira");
-      this.personagemRemoto = this.add.sprite(100, 150, "mira");
-    } else if (this.game.jogadores.segundo === this.game.socket.id) {
-      this.game.localConnection = new RTCPeerConnection(this.game.iceServers);
-      this.game.dadosJogo = this.game.localConnection.createDataChannel(
-        "dadosJogo",
-        {
-          negotiated: true,
-          id: 0,
-        }
-      );
-
-      this.game.localConnection.onicecandidate = ({ candidate }) => {
-        this.game.socket.emit("candidate", this.game.sala, candidate);
-      };
-
-      this.game.localConnection.ontrack = ({ streams: [stream] }) => {
-        this.game.audio.srcObject = stream;
-      };
-
-      if (this.game.midias) {
-        this.game.midias
-          .getTracks()
-          .forEach((track) =>
-            this.game.localConnection.addTrack(track, this.game.midias)
-          );
-      }
-
-      this.game.localConnection
-        .createOffer()
-        .then((offer) => this.game.localConnection.setLocalDescription(offer))
-        .then(() =>
-          this.game.socket.emit(
-            "offer",
-            this.game.sala,
-            this.game.localConnection.localDescription
-          )
-        );
-
-      this.game.socket.on("answer", (description) => {
-        this.game.localConnection.setRemoteDescription(description);
-      });
-
-      this.game.socket.on("candidate", (candidate) => {
-        this.game.localConnection.addIceCandidate(candidate);
-      });
-
-      this.personagemLocal = this.physics.add.sprite(100, 100, "mira");
-      this.personagemRemoto = this.add.sprite(100, 150, "mira");
-    }
-
-    this.game.dadosJogo.onopen = () => {
-      console.log("Conexão de dados aberta");
-    };
-    this.game.dadosJogo.onmessage = (event) => {
-      const dados = JSON.parse(event.data);
-      if (dados.persongem) {
-        this.personagemRemoto.X = dados.personagem.x;
-        this.personagemRemoto.Y = dados.personagem.y;
-        this.personagemRemoto.setFrame(dados.personagem.frame);
-      }
-    };
 
     const scoreAnterior = this.registry.get("score") || 0;
     this.score = scoreAnterior;
@@ -240,15 +114,10 @@ export default class fase1 extends Phaser.Scene {
         ) {
           passaro.acertado = true;
           passaro.setVelocity(0, 0);
-          passaro.anims.play("impacto");
+          passaro.anims.play("queda-branca-f1");
 
           passaro.once("animationcomplete", () => {
-            passaro.setVelocity(0, 100);
-            passaro.anims.play("queda");
-
-            passaro.once("animationcomplete", () => {
-              passaro.destroy();
-            });
+            passaro.destroy();
           });
 
           this.score += 10;
@@ -288,53 +157,24 @@ export default class fase1 extends Phaser.Scene {
         passaro.y < -60 ||
         passaro.y > 600
       ) {
-        if (!passaro.acertado) {
-          this.passarosRestantes--;
-        }
+        if (!passaro.acertado) this.passarosRestantes--;
         passaro.destroy();
       }
     });
 
-    if (
-      this.passarosRestantes === 0 &&
-      this.tirosRestantes >= 0 &&
-      !this.aguardandoNovaRodada
-    ) {
+    if (this.passarosRestantes === 0 && !this.aguardandoNovaRodada) {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
         this.irParaFase2();
       });
     }
-
-    try {
-      if (this.game.dadosJogo.readyState === "open") {
-        if (this.personagemLocal) {
-          this.game.dadosJogo.send(
-            JSON.stringify({
-              personagem: {
-                x: this.personagemLocal.x,
-                y: this.personagemLocal.y,
-                frame: this.personagemLocal.frame.name,
-              },
-            })
-          );
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
   }
 
-  spawnPassaro = () => {
+  spawnPassaro() {
     if (this.totalPassarosGerados >= this.maxPassaros) return;
 
-    const backgroundY = 190;
-    const backgroundHeight = 380;
-    const topLimit = backgroundY - backgroundHeight / 2;
-    const bottomLimit = backgroundY + backgroundHeight / 2;
-
-    const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
+    const y = Phaser.Math.Between(100, 300);
     const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
     const x = direcao === 1 ? -50 : 850;
 
@@ -343,13 +183,12 @@ export default class fase1 extends Phaser.Scene {
       Phaser.Math.Between(100, 150) * direcao,
       Phaser.Math.Between(-80, 80)
     );
-    passaro.direcao = direcao;
     passaro.setFlipX(direcao === -1);
     passaro.acertado = false;
 
-    passaro.anims.play("voar", true);
+    passaro.anims.play("voar-branca-f1", true);
     this.totalPassarosGerados++;
-  };
+  }
 
   irParaFase2() {
     this.scene.stop("fase1");

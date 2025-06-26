@@ -1,53 +1,50 @@
-const express = require("express");
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import path from "path";
+import { fileURLToPath } from "url";
+
 const app = express();
-const server = require("http").Server(app);
-const io = require("socket.io")(server);
-const PORT = process.env.PORT || 3000;
+const server = createServer(app);
+const io = new Server(server);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Servir os arquivos estáticos da pasta "cliente"
+app.use(express.static(path.join(__dirname, "cliente")));
+
+const salas = {};
 
 io.on("connection", (socket) => {
-  console.log("Usuário %s conectado no servidor.", socket.id);
+  console.log("Novo jogador:", socket.id);
 
   socket.on("entrar-na-sala", (sala) => {
     socket.join(sala);
-    console.log("Usuário %s entrou na sala %s.", socket.id, sala);
-
-    let jogadores = {};
-    if (io.sockets.adapter.rooms.get(sala).size === 1) {
-      jogadores = {
-        primeiro: socket.id,
-        segundo: undefined,
-      };
-    } else if (io.sockets.adapter.rooms.get(sala).size === 2) {
-      const [primeiro] = io.sockets.adapter.rooms.get(sala);
-      jogadores = {
-        primeiro,
-        segundo: socket.id,
-      };
-      console.log(
-        "Sala %s com 2 jogadores. Partida pronta para iniciar.",
-        sala,
-      );
+    if (!salas[sala]) {
+      salas[sala] = [];
     }
+    salas[sala].push(socket.id);
 
-    io.to(sala).emit("jogadores", jogadores);
+    const jogadores = salas[sala];
+    socket.emit("jogadores", {
+      primeiro: jogadores[0],
+      segundo: jogadores[1] || null,
+    });
   });
 
-  socket.on("offer", (sala, description) => {
-    socket.to(sala).emit("offer", description);
+  socket.on("disconnect", () => {
+    for (const sala in salas) {
+      salas[sala] = salas[sala].filter((id) => id !== socket.id);
+      if (salas[sala].length === 0) {
+        delete salas[sala];
+      }
+    }
+    console.log("Jogador desconectado:", socket.id);
   });
-
-  socket.on("candidate", (sala, candidate) => {
-    socket.to(sala).emit("candidate", candidate);
-  });
-
-  socket.on("answer", (sala, description) => {
-    socket.to(sala).emit("answer", description);
-  });
-
-  socket.on("disconnect", () => {});
 });
 
-app.use(express.static("./cliente/"));
-server.listen(PORT, () =>
-  console.log(`Servidor em execução na porta ${PORT}!`),
-);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});

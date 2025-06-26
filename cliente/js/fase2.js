@@ -23,19 +23,27 @@ export default class fase2 extends Phaser.Scene {
       frameHeight: 64,
     });
 
-    this.load.spritesheet("pomba-branca-caindo", "assets/pomba-branca-caindo.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
+    this.load.spritesheet(
+      "pomba-branca-caindo",
+      "assets/pomba-branca-caindo.png",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
 
     this.load.spritesheet("pomba-cinza", "assets/pomba-cinza.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-    this.load.spritesheet("pomba-cinza-caindo", "assets/pomba-cinza-caindo.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
+    this.load.spritesheet(
+      "pomba-cinza-caindo",
+      "assets/pomba-cinza-caindo.png",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
   }
 
   create() {
@@ -43,7 +51,7 @@ export default class fase2 extends Phaser.Scene {
     this.fire = this.sound.add("fire");
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-branca-f2",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -53,7 +61,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda",
+      key: "voar-esquerda-pomba-branca-f2",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 6,
         end: 11,
@@ -63,7 +71,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-pomba-branca-f2",
       frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
         start: 0,
         end: 5,
@@ -73,7 +81,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-direita",
+      key: "voar-direita-pomba-cinza-f2",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -83,7 +91,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda",
+      key: "voar-esquerda-pomba-cinza-f2",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 6,
         end: 11,
@@ -93,7 +101,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-pomba-cinza-f2",
       frames: this.anims.generateFrameNumbers("pomba-cinza-caindo", {
         start: 0,
         end: 5,
@@ -266,7 +274,7 @@ export default class fase2 extends Phaser.Scene {
             passaro.atingido = true;
             passaro.setTexture("queda-passaro");
             passaro.setVelocity(0, 100);
-            passaro.anims.play("queda", true);
+            passaro.anims.play("queda-branca-f2", true);
             passaro.once("animationcomplete", () => {
               passaro.setVisible(false);
               passaro.atingido = false;

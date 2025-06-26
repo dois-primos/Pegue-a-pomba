@@ -1,35 +1,26 @@
 /*global Phaser*/
-/*eslint no-undef: "error"*/
+
 export default class precarregamento extends Phaser.Scene {
   constructor() {
     super("precarregamento");
   }
 
-  init() {
-    this.add.rectangle(400, 300, 468, 32).setStrokeStyle(1, 0xffffff);
-    const progresso = this.add
-      .rectangle(400, 300, 468, 32)
-      .setFillStyle(0xffffff);
-    this.load.on("progress", (progress) => {
-      progresso.width = 4 + 460 * progress;
-    });
-  }
-
   preload() {
-    this.load.setPath("assets/");
-    this.load.image("background", "background.png");
-    this.load.image("mira", "mira.png");
-    this.load.spritesheet("botao", "assets/botao.png", {
+    // Exemplo de carregamento de imagens
+    this.load.image("background", "assets/background.png");
+    this.load.image("mira", "assets/mira.png");
+    this.load.image("pomba", "assets/pomba-branca.png");
+    this.load.audio("musica", "assets/som.mp3");
+    this.load.spritesheet("explosao", "assets/explosao.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
 
-
+    // Fonte personalizada, se houver
+    this.load.bitmapFont("pixelFont", "assets/font.png", "assets/font.xml");
   }
 
   create() {
-    this.scene.start("sala");
+    this.scene.start("abertura");
   }
-
-  update() {}
 }
