@@ -10,6 +10,7 @@ import gameover from "./gameover.js";
 import finalfeliz from "./finalfeliz.js";
 import sala from "./sala.js";
 
+
 // Conecta com o servidor Socket.io (já disponível globalmente)
 const socket = io();
 
@@ -32,6 +33,11 @@ const config = {
       debug: false,
     },
   },
+
+  input: {
+    gamepad: true,
+  },
+
   scene: [
     precarregamento,
     abertura,
