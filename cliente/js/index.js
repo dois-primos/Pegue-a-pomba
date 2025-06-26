@@ -9,7 +9,6 @@ import fase5 from "./fase5.js";
 import gameover from "./gameover.js";
 import finalfeliz from "./finalfeliz.js";
 import sala from "./sala.js";
-import revoada from "./revoada.js";
 
 // Conecta com o servidor Socket.io (já disponível globalmente)
 const socket = io();
@@ -42,7 +41,6 @@ const config = {
     fase3,
     fase4,
     fase5,
-    revoada,
     gameover,
     finalfeliz,
   ],
