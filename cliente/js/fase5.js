@@ -5,13 +5,11 @@ export default class fase5 extends Phaser.Scene {
     super("fase5");
     this.speed = 200;
     this.score = 0;
-    this.scoreRemoto = 0;
-    this.tirosRestantes = 15;
+    this.tirosRestantes = 14;
     this.passarosRestantes = 12;
     this.maxPassaros = 12;
     this.totalPassarosGerados = 0;
     this.aguardandoNovaRodada = false;
-    this.botaoTiroPressionado = false;
   }
 
   preload() {
@@ -35,108 +33,54 @@ export default class fase5 extends Phaser.Scene {
   create() {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
-    this.passaros = this.physics.add.group();
-    this.tempoParaNovoPassaro = 0;
-    this.personagemLocal = this.physics.add
+    this.mira = this.physics.add
       .sprite(100, 100, "mira")
       .setCollideWorldBounds(true);
-    this.personagemRemoto = this.add.sprite(100, 100, "mira").setAlpha(0.5);
+    this.passaros = this.physics.add.group();
+    this.tempoParaNovoPassaro = 0;
 
+    // Animações
     this.anims.create({
-      key: "voar-direita-pomba-branca",
+      key: "voar-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
       }),
-      frameRate: 12,
+      frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "voar-esquerd-pomba-branca",
-      frames: this.anims.generateFrameNumbers("pomba-branca", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
-    this.anims.create({
-      key: "voar-direita-pomba-cinza",
+      key: "voar-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
       }),
-      frameRate: 12,
+      frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("pomba-cinza", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
+      key: "voar-corvo",
+      frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
+      frameRate: 10,
       repeat: -1,
     });
 
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("pomba-cinza-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
-    this.anims.create({
-      key: "voar-direita-corvo",
-      frames: this.anims.generateFrameNumbers("corvo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("corvo", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("corvo-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
+    // Função para gerar pássaros e corvos
     this.spawnPassaro = () => {
       if (this.totalPassarosGerados >= this.maxPassaros) return;
-      const y = Phaser.Math.Between(20, 360);
+
+      const backgroundY = 190;
+      const backgroundHeight = 380;
+      const topLimit = backgroundY - backgroundHeight / 2;
+      const bottomLimit = backgroundY + backgroundHeight / 2;
+
+      const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
       const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
       const x = direcao === 1 ? -50 : 850;
+
+      // Escolher aleatoriamente entre pomba branca, cinza ou corvo
       const tipoPassaro =
         Phaser.Math.Between(0, 2) === 0
           ? "pomba-branca"
@@ -149,32 +93,27 @@ export default class fase5 extends Phaser.Scene {
           : tipoPassaro === "pomba-cinza"
           ? "voar-cinza"
           : "voar-corvo";
+
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
         Phaser.Math.Between(-80, 80)
       );
+      passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
       passaro.acertado = false;
+
       passaro.anims.play(animacao, true);
       this.totalPassarosGerados++;
     };
 
+    // Inicialização de variáveis
     this.score = this.registry.get("score") || 0;
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
       fill: "#fff",
     });
-    this.scoreRemotoText = this.add.text(
-      16,
-      50,
-      "Inimigo: " + this.scoreRemoto,
-      {
-        fontSize: "28px",
-        fill: "#fff",
-      }
-    );
-    this.tirosText = this.add.text(16, 84, "Tiros: " + this.tirosRestantes, {
+    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
       fontSize: "28px",
       fill: "#fff",
     });
@@ -183,12 +122,14 @@ export default class fase5 extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(1);
 
+    // Função para atualizar pontuação
     this.atualizarPontuacao = (valor) => {
       this.score += valor;
       this.registry.set("score", this.score);
       this.scoreText.setText("Pontuação: " + this.score);
     };
 
+    // Controle de gamepad (sem alterações)
     this.input.gamepad.once("connected", (pad) => {
       this.gamepad = pad;
       pad.on("down", (index) => {
@@ -198,62 +139,60 @@ export default class fase5 extends Phaser.Scene {
         }
       });
     });
-
-    // Atualiza placar remoto recebido via WebRTC
-    this.game.dadosJogo.onmessage = ({ data }) => {
-      const mensagem = JSON.parse(data);
-      if (mensagem.personagem) {
-        this.personagemRemoto.setPosition(
-          mensagem.personagem.x,
-          mensagem.personagem.y
-        );
-      }
-      if (mensagem.score !== undefined) {
-        this.scoreRemoto = mensagem.score;
-        this.scoreRemotoText.setText("Inimigo: " + this.scoreRemoto);
-      }
-    };
   }
 
   update(time, delta) {
-    if (!this.personagemLocal || !this.input.gamepad.total) return;
-    const pad = this.input.gamepad.getPad(0);
-    const axisH = pad.axes[0].getValue();
-    const axisV = pad.axes[1].getValue();
-    const botaoTiro = pad.buttons[2].pressed;
+    if (this.input.gamepad.total > 0 && !this.aguardandoNovaRodada) {
+      const pad = this.input.gamepad.getPad(0);
+      const axisH = pad.axes[0].getValue();
+      const axisV = pad.axes[1].getValue();
+      const botaoTiro = pad.buttons[2].pressed;
 
-    this.personagemLocal.setVelocity(this.speed * axisH, this.speed * axisV);
-
-    if (botaoTiro && !this.botaoTiroPressionado && this.tirosRestantes > 0) {
-      this.fire.play();
-      this.tirosRestantes--;
-      this.tirosText.setText("Tiros: " + this.tirosRestantes);
+      this.mira.setVelocity(this.speed * axisH, this.speed * axisV);
 
       this.passaros.getChildren().forEach((passaro) => {
+        const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
+          this.mira.getBounds(),
+          passaro.getBounds()
+        );
+
         if (
+          colidiu &&
+          botaoTiro &&
+          !this.ultimoTiro &&
           !passaro.acertado &&
-          Phaser.Geom.Intersects.RectangleToRectangle(
-            this.personagemLocal.getBounds(),
-            passaro.getBounds()
-          )
+          this.tirosRestantes > 0
         ) {
           passaro.acertado = true;
           passaro.destroy();
+          this.fire.play();
           if (passaro.texture.key === "corvo") {
-            this.atualizarPontuacao(-5);
+            this.atualizarPontuacao(-5); // Perde pontos ao acertar o corvo
           } else {
-            this.atualizarPontuacao(10);
+            this.atualizarPontuacao(10); // Pontuação normal para as pombas
           }
           this.passarosRestantes--;
+          this.tirosRestantes--;
+          this.tirosText.setText("Tiros: " + this.tirosRestantes);
+          this.ultimoTiro = true;
         }
       });
+
+      if (botaoTiro && !this.ultimoTiro && this.tirosRestantes > 0) {
+        this.fire.play();
+        this.tirosRestantes--;
+        this.tirosText.setText("Tiros: " + this.tirosRestantes);
+        this.ultimoTiro = true;
+      }
+
+      if (!botaoTiro) this.ultimoTiro = false;
     }
 
-    this.botaoTiroPressionado = botaoTiro;
-
+    // Limite no número de pássaros em tela
     if (!this.aguardandoNovaRodada && this.passarosRestantes > 0) {
       this.tempoParaNovoPassaro += delta;
-      if (this.tempoParaNovoPassaro > 1500) {
+      if (this.tempoParaNovoPassaro > 1200) {
+        // Menor tempo entre os pássaros
         this.tempoParaNovoPassaro = 0;
         if (this.passaros.countActive(true) < this.maxPassaros) {
           this.spawnPassaro();
@@ -261,6 +200,7 @@ export default class fase5 extends Phaser.Scene {
       }
     }
 
+    // Remove os pássaros que saem da tela e reduz o contador
     this.passaros.getChildren().forEach((passaro) => {
       if (
         passaro.x < -60 ||
@@ -275,27 +215,22 @@ export default class fase5 extends Phaser.Scene {
       }
     });
 
-    if (this.passarosRestantes === 0 && !this.aguardandoNovaRodada) {
+    // Verifica fim da fase
+    if (
+      this.passarosRestantes === 0 &&
+      this.tirosRestantes >= 0 &&
+      !this.aguardandoNovaRodada
+    ) {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
-        if (this.score >= this.scoreRemoto) {
-          this.scene.stop("fase5");
-          this.scene.start("finalFeliz");
-        } else {
-          this.scene.stop("fase5");
-          this.scene.start("gameover");
-        }
+        this.irParafinalfeliz();
       });
     }
+  }
 
-    if (this.game.dadosJogo && this.game.dadosJogo.readyState === "open") {
-      this.game.dadosJogo.send(
-        JSON.stringify({
-          personagem: { x: this.personagemLocal.x, y: this.personagemLocal.y },
-          score: this.score,
-        })
-      );
-    }
+  irParafinalfeliz() {
+    this.scene.stop("fase5");
+    this.scene.start("finalfeliz");
   }
 }

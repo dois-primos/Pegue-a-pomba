@@ -1,17 +1,13 @@
-/*global Phaser*/
-/*eslint no-undef: "error"*/
 export default class fase4 extends Phaser.Scene {
   constructor() {
     super("fase4");
     this.speed = 200;
     this.score = 0;
     this.tirosRestantes = 12;
-    this.passarosRestantes = 10;
-    this.maxPassaros = 10;
+    this.passarosRestantes = 10; // Quantos precisam ser abatidos
+    this.maxPassaros = 10; // Limite total de pombas geradas
     this.totalPassarosGerados = 0;
     this.aguardandoNovaRodada = false;
-    this.botaoTiroPressionado = false;
-    this.authInstance = null; // Para Google Identity API
   }
 
   preload() {
@@ -33,117 +29,56 @@ export default class fase4 extends Phaser.Scene {
   }
 
   create() {
-    // Background e sons
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
-
-    // Grupo de pássaros
+    this.mira = this.physics.add
+      .sprite(100, 100, "mira")
+      .setCollideWorldBounds(true);
     this.passaros = this.physics.add.group();
     this.tempoParaNovoPassaro = 0;
 
-    // Mira local e remota
-    this.personagemLocal = this.physics.add
-      .sprite(100, 100, "mira")
-      .setCollideWorldBounds(true);
-    this.personagemRemoto = this.add.sprite(100, 100, "mira").setAlpha(0.5);
-
-    // Animações
+    // Criação de animações
     this.anims.create({
-      key: "voar-direita-pomba-branca",
+      key: "voar-branca",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
       }),
-      frameRate: 12,
+      frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("pomba-branca", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
-    this.anims.create({
-      key: "voar-direita-pomna-cinza",
+      key: "voar-cinza",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
       }),
-      frameRate: 12,
+      frameRate: 10,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("pomba-cinza", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
+      key: "voar-corvo",
+      frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
+      frameRate: 10,
       repeat: -1,
     });
 
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("pomba-cinza-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
-    this.anims.create({
-      key: "voar-direita-corvo",
-      frames: this.anims.generateFrameNumbers("corvo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "voar-esquerda",
-      frames: this.anims.generateFrameNumbers("corvo", {
-        start: 6,
-        end: 11,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "queda",
-      frames: this.anims.generateFrameNumbers("corvo-caindo", {
-        start: 0,
-        end: 5,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
-    // Spawn de pássaros
+    // Função para gerar pássaros e corvo
     this.spawnPassaro = () => {
       if (this.totalPassarosGerados >= this.maxPassaros) return;
-      const y = Phaser.Math.Between(20, 360);
+
+      const backgroundY = 190;
+      const backgroundHeight = 380;
+      const topLimit = backgroundY - backgroundHeight / 2;
+      const bottomLimit = backgroundY + backgroundHeight / 2;
+
+      const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
       const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
       const x = direcao === 1 ? -50 : 850;
+
+      // Escolher aleatoriamente entre pomba branca, cinza ou corvo
       const tipoPassaro =
         Phaser.Math.Between(0, 2) === 0
           ? "pomba-branca"
@@ -156,18 +91,21 @@ export default class fase4 extends Phaser.Scene {
           : tipoPassaro === "pomba-cinza"
           ? "voar-cinza"
           : "voar-corvo";
+
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
         Phaser.Math.Between(-80, 80)
       );
+      passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
       passaro.acertado = false;
+
       passaro.anims.play(animacao, true);
       this.totalPassarosGerados++;
     };
 
-    // Textos na tela
+    // Inicialização de variáveis
     this.score = this.registry.get("score") || 0;
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
@@ -182,109 +120,73 @@ export default class fase4 extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(1);
 
-    // Atualiza pontuação
+    // Função para atualizar pontuação
     this.atualizarPontuacao = (valor) => {
       this.score += valor;
       this.registry.set("score", this.score);
       this.scoreText.setText("Pontuação: " + this.score);
     };
 
-    // Evento para reload ao apertar botão 9 do gamepad
+    // Controle de gamepad (sem alterações)
     this.input.gamepad.once("connected", (pad) => {
       this.gamepad = pad;
       pad.on("down", (index) => {
         if (index === 9) {
-          location.reload(); // Reload da página
+          this.scene.stop();
+          this.scene.start("abertura");
         }
       });
     });
-
-    // === INÍCIO DA INTEGRAÇÃO GOOGLE IDENTITY API ===
-    if (window.google && google.accounts) {
-      google.accounts.id.initialize({
-        client_id: "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com",
-        callback: this.handleGoogleCredentialResponse.bind(this),
-      });
-      google.accounts.id.prompt(); // Prompt para login automático se possível
-    } else {
-      console.warn(
-        "Google Identity API não encontrada. Verifique se o script está incluído no HTML."
-      );
-    }
-  }
-
-  handleGoogleCredentialResponse(response) {
-    // Aqui você pode tratar o token JWT retornado pela Google Identity API
-    console.log("ID Token:", response.credential);
-    // Por exemplo, enviar token para sua API externa para créditos, autenticação, etc
-    this.enviarTokenParaAPIExterna(response.credential);
-  }
-
-  async enviarTokenParaAPIExterna(token) {
-    try {
-      const resposta = await fetch("https://sua-api-externa.com/creditos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userToken: token }),
-      });
-      const dados = await resposta.json();
-      console.log("Resposta API externa:", dados);
-      // Pode atualizar créditos no jogo aqui se quiser
-    } catch (erro) {
-      console.error("Erro na API externa:", erro);
-    }
   }
 
   update(time, delta) {
-    if (!this.personagemLocal || !this.input.gamepad.total) return;
-    const pad = this.input.gamepad.getPad(0);
-    const axisH = pad.axes[0].getValue();
-    const axisV = pad.axes[1].getValue();
-    const botaoTiro = pad.buttons[2].pressed;
-    this.personagemLocal.setVelocity(this.speed * axisH, this.speed * axisV);
+    if (this.input.gamepad.total > 0 && !this.aguardandoNovaRodada) {
+      const pad = this.input.gamepad.getPad(0);
+      const axisH = pad.axes[0].getValue();
+      const axisV = pad.axes[1].getValue();
+      const botaoTiro = pad.buttons[2].pressed;
 
-    if (this.game.dadosJogo && this.game.dadosJogo.readyState === "open") {
-      this.game.dadosJogo.send(
-        JSON.stringify({
-          personagem: { x: this.personagemLocal.x, y: this.personagemLocal.y },
-          tiro: botaoTiro,
-        })
-      );
-    }
+      this.mira.setVelocity(this.speed * axisH, this.speed * axisV);
 
-    if (this.jogadorPrincipal === undefined && this.game.socket) {
-      this.jogadorPrincipal =
-        this.game.jogadores.primeiro === this.game.socket.id;
-    }
-
-    if (this.passaros && this.jogadorPrincipal) {
-      const colidiuCom = this.passaros.getChildren().find((passaro) => {
-        return (
-          Phaser.Geom.Intersects.RectangleToRectangle(
-            this.personagemLocal.getBounds(),
-            passaro.getBounds()
-          ) && !passaro.acertado
+      this.passaros.getChildren().forEach((passaro) => {
+        const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
+          this.mira.getBounds(),
+          passaro.getBounds()
         );
+
+        if (
+          colidiu &&
+          botaoTiro &&
+          !this.ultimoTiro &&
+          !passaro.acertado &&
+          this.tirosRestantes > 0
+        ) {
+          passaro.acertado = true;
+          passaro.destroy();
+          this.fire.play();
+          if (passaro.texture.key === "corvo") {
+            this.atualizarPontuacao(-5); // Perde pontos ao acertar o corvo
+          } else {
+            this.atualizarPontuacao(10); // Pontuação normal para as pombas
+          }
+          this.passarosRestantes--;
+          this.tirosRestantes--;
+          this.tirosText.setText("Tiros: " + this.tirosRestantes);
+          this.ultimoTiro = true;
+        }
       });
 
-      if (colidiuCom && botaoTiro && this.tirosRestantes > 0) {
-        colidiuCom.acertado = true;
-        colidiuCom.destroy();
+      if (botaoTiro && !this.ultimoTiro && this.tirosRestantes > 0) {
         this.fire.play();
-        if (colidiuCom.texture.key === "corvo") {
-          this.atualizarPontuacao(-5);
-        } else {
-          this.atualizarPontuacao(10);
-        }
-        this.passarosRestantes--;
         this.tirosRestantes--;
         this.tirosText.setText("Tiros: " + this.tirosRestantes);
+        this.ultimoTiro = true;
       }
+
+      if (!botaoTiro) this.ultimoTiro = false;
     }
 
+    // Limite no número de pássaros em tela
     if (!this.aguardandoNovaRodada && this.passarosRestantes > 0) {
       this.tempoParaNovoPassaro += delta;
       if (this.tempoParaNovoPassaro > 1500) {
@@ -295,6 +197,7 @@ export default class fase4 extends Phaser.Scene {
       }
     }
 
+    // Remove os pássaros que saem da tela e reduz o contador
     this.passaros.getChildren().forEach((passaro) => {
       if (
         passaro.x < -60 ||
@@ -309,27 +212,17 @@ export default class fase4 extends Phaser.Scene {
       }
     });
 
-    if (this.passarosRestantes === 0 && !this.aguardandoNovaRodada) {
+    // Verifica fim da fase
+    if (
+      this.passarosRestantes === 0 &&
+      this.tirosRestantes >= 0 &&
+      !this.aguardandoNovaRodada
+    ) {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
         this.irParaFase5();
       });
-    }
-
-    if (this.game.dadosJogo && this.game.dadosJogo.readyState === "open") {
-      this.game.dadosJogo.onmessage = ({ data }) => {
-        const mensagem = JSON.parse(data);
-        if (mensagem.personagem) {
-          this.personagemRemoto.setPosition(
-            mensagem.personagem.x,
-            mensagem.personagem.y
-          );
-        }
-        if (mensagem.tiro && !this.botaoTiroPressionado) {
-          this.fire.play();
-        }
-      };
     }
   }
 
