@@ -1,55 +1,59 @@
-// index.js
+/*global Phaser, io*/
+/*eslint no-undef: "error"*/
+import config from "./config.js";
 import abertura from "./abertura.js";
 import precarregamento from "./precarregamento.js";
 import fase1 from "./fase1.js";
-import fase2 from "./fase2.js";
-import fase3 from "./fase3.js";
-import fase4 from "./fase4.js";
-import fase5 from "./fase5.js";
+//import fase2 from "./fase2.js";
+//import fase3 from "./fase3.js";
+//import fase4 from "./fase4.js";
+//import fase5 from "./fase5.js";
 import gameover from "./gameover.js";
 import finalfeliz from "./finalfeliz.js";
 import sala from "./sala.js";
 
+class Game extends Phaser.Game {
+  constructor() {
+    super(config);
 
-// Conecta com o servidor Socket.io (já disponível globalmente)
-const socket = io();
+    this.audio = document.querySelector("audio");
+    this.iceServers = {
+      iceServers: [
+        {
+          urls: "stun:feira-de-jogos.dev.br",
+        },
+        {
+          urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    };
+    this.socket = io();
 
-globalThis.game = {
-  jogadores: {},
-  sala: null,
-  socket: socket,
-  // Pode adicionar outras propriedades globais aqui se quiser
+    this.socket.on("connect", () => {
+      console.log(`Usuário ${this.socket.id} conectado no servidor`);
+    });
+
+    this.scene.add("abertura", abertura);
+    this.scene.add("precarregamento", precarregamento);
+    this.scene.add("sala", sala);
+    this.scene.add("fase1", fase1);
+    this.scene.add("gameover", gameover);
+    this.scene.add("finalfeliz", finalfeliz);
+
+    this.scene.start("abertura");
+  }
+}
+
+window.onload = () => {
+  window.game = new Game();
 };
 
-const config = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  parent: "game-container",
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 0 },
-      debug: false,
-    },
-  },
 
-  input: {
-    gamepad: true,
-  },
 
-  scene: [
-    precarregamento,
-    abertura,
-    sala,
-    fase1,
-    fase2,
-    fase3,
-    fase4,
-    fase5,
-    gameover,
-    finalfeliz,
-  ],
-};
 
-new Phaser.Game(config);
+
+
+
+
+
+

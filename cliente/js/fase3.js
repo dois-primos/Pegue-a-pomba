@@ -35,7 +35,7 @@ export default class fase3 extends Phaser.Scene {
 
     // Criação de animações
     this.anims.create({
-      key: "voar-branca",
+      key: "voar-branca-f3",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -45,7 +45,7 @@ export default class fase3 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-cinza",
+      key: "voar-cinza-f3",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -71,7 +71,7 @@ export default class fase3 extends Phaser.Scene {
       const tipoPassaro =
         Phaser.Math.Between(0, 1) === 0 ? "pomba-branca" : "pomba-cinza";
       const animacao =
-        tipoPassaro === "pomba-branca" ? "voar-branca" : "voar-cinza";
+        tipoPassaro === "pomba-branca" ? "voar-branca-f3" : "voar-cinza-f3";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(

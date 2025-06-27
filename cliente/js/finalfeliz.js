@@ -1,8 +1,8 @@
 /*global Phaser, axios*/
 /*eslint no-undef: "error"*/
-export default class finalFeliz extends Phaser.Scene {
+export default class finalfeliz extends Phaser.Scene {
   constructor() {
-    super("finalFeliz");
+    super("finalfeliz");
   }
 
   init() {}

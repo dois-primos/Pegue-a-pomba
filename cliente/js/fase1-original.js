@@ -25,7 +25,7 @@ export default class fase1 extends Phaser.Scene {
       frameHeight: 64,
     });
 
-    this.load.spritesheet("queda-passaro", "assets/queda-passaro.png", {
+    this.load.spritesheet("queda-passaro-f11", "assets/queda-passaro.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
@@ -41,7 +41,7 @@ export default class fase1 extends Phaser.Scene {
     this.tempoParaNovoPassaro = 0;
 
     this.anims.create({
-      key: "voar",
+      key: "voar-f11",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -51,7 +51,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "impacto",
+      key: "impacto-f11",
       frames: this.anims.generateFrameNumbers("impacto-passaro", {
         start: 0,
         end: 0,
@@ -60,7 +60,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-f11",
       frames: this.anims.generateFrameNumbers("queda-passaro", {
         start: 0,
         end: 0,
@@ -234,7 +234,7 @@ export default class fase1 extends Phaser.Scene {
 
           passaro.once("animationcomplete", () => {
             passaro.setVelocity(0, 100);
-            passaro.anims.play("queda");
+            passaro.anims.play("queda-f11");
 
             passaro.once("animationcomplete", () => {
               passaro.destroy();
@@ -337,7 +337,7 @@ export default class fase1 extends Phaser.Scene {
     passaro.setFlipX(direcao === -1);
     passaro.acertado = false;
 
-    passaro.anims.play("voar", true);
+    passaro.anims.play("voar-f11", true);
     this.totalPassarosGerados++;
   };
 

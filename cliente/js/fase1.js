@@ -32,32 +32,12 @@ export default class fase1 extends Phaser.Scene {
     );
   }
 
-  create() {
-    // Entra na sala e espera evento com dados dos jogadores antes de iniciar
-    this.passaros = this.physics.add.group();
-    this.cenaIniciada = false;
-    
-    globalThis.game.socket.emit("entrar-na-sala", this.game.sala);
-
-    globalThis.game.socket.once("jogadores", (jogadores) => {
-      this.game.jogadores = jogadores;
-
-      if (jogadores.segundo) {
-        this.initConexao();
-        this.setupScene();
-      }
-    });
-  }
-
-  setupScene () {
-    
+  create () {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
-    this.cenaIniciada = true;
 
-    // Criação das animações (repita como no seu código original)
     this.anims.create({
-      key: "voar-direita-pomba-branca-f1",
+      key: "voar-direita-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -67,7 +47,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda-pomba-branca-f1",
+      key: "voar-esquerda-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 6,
         end: 11,
@@ -77,7 +57,7 @@ export default class fase1 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "queda",
+      key: "queda-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
         start: 0,
         end: 5,
@@ -86,7 +66,7 @@ export default class fase1 extends Phaser.Scene {
       repeat: 0,
     });
 
-  
+    this.passaros = this.physics.add.group();
     for (let i = 0; i < 15; i++) {
       const backgroundY = 190;
       const backgroundHeight = 380;
@@ -99,7 +79,8 @@ export default class fase1 extends Phaser.Scene {
       passaro.direcao = direcao;
     }
 
-    // Textos da UI
+    this.initConexao();
+
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
       fill: "#fff",
@@ -110,12 +91,11 @@ export default class fase1 extends Phaser.Scene {
       fill: "#fff",
     });
 
-    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
+    this.tirosText = this.add.text(16, 60, "Tiros: 20", {
       fontSize: "28px",
       fill: "#fff",
     });
 
-    // Gamepad reload button
     this.input.gamepad.on("down", (pad) => {
       if (pad.buttons[9].pressed) {
         window.location.reload();
@@ -124,22 +104,19 @@ export default class fase1 extends Phaser.Scene {
   }
 
   initConexao() {
-    const isPrimeiro =
-      this.game.jogadores.primeiro === globalThis.game.socket.id;
-
-    const rtc = new RTCPeerConnection(this.game.iceServers || {});
+    const isPrimeiro = this.game.jogadores.primeiro === this.game.socket.id;
+    const rtc = new RTCPeerConnection(this.game.iceServers);
 
     this.game.dadosJogo = rtc.createDataChannel("dadosJogo", {
       negotiated: true,
       id: 0,
     });
-
     this.game.dadosJogo.onopen = () => console.log("Canal de dados aberto");
     this.game.dadosJogo.onmessage = (event) => this.receberDados(event);
 
     rtc.onicecandidate = ({ candidate }) => {
       if (candidate)
-        globalThis.game.socket.emit("candidate", this.game.sala, candidate);
+        this.game.socket.emit("candidate", this.game.sala, candidate);
     };
 
     rtc.ontrack = ({ streams: [stream] }) => {
@@ -161,47 +138,31 @@ export default class fase1 extends Phaser.Scene {
     }
   }
 
-  async configurarPrimeiroJogador() {
-    globalThis.game.socket.off("offer"); // Remove listeners anteriores para evitar duplicação
-    globalThis.game.socket.on("offer", async (description) => {
-      try {
-        if (!this.game.remoteConnection) return;
-
-        await this.game.remoteConnection.setRemoteDescription(description);
-
-        const state = this.game.remoteConnection.signalingState;
-        if (state !== "have-remote-offer" && state !== "stable") {
-          console.warn("Estado inesperado para criar answer:", state);
-          return;
-        }
-
-        const answer = await this.game.remoteConnection.createAnswer();
-        await this.game.remoteConnection.setLocalDescription(answer);
-
-        globalThis.game.socket.emit(
-          "answer",
-          this.game.sala,
-          this.game.remoteConnection.localDescription
-        );
-      } catch (error) {
-        console.error("Erro no fluxo offer/answer:", error);
-      }
+  configurarPrimeiroJogador() {
+    this.game.socket.on("offer", (description) => {
+      this.game.remoteConnection
+        .setRemoteDescription(description)
+        .then(() => this.game.remoteConnection.createAnswer())
+        .then((answer) =>
+          this.game.remoteConnection.setLocalDescription(answer)
+        )
+        .then(() => {
+          this.game.socket.emit(
+            "answer",
+            this.game.sala,
+            this.game.remoteConnection.localDescription
+          );
+        });
     });
 
-    globalThis.game.socket.off("candidate");
-    globalThis.game.socket.on("candidate", (candidate) => {
-      if (this.game.remoteConnection && candidate) {
-        this.game.remoteConnection.addIceCandidate(candidate).catch((e) => {
-          console.error("Erro ao adicionar ICE candidate:", e);
-        });
-      }
+    this.game.socket.on("candidate", (candidate) => {
+      this.game.remoteConnection.addIceCandidate(candidate);
     });
 
     this.personagemLocal = this.physics.add
       .sprite(225, 225, "mira")
       .setCollideWorldBounds(true);
     this.personagemRemoto = this.add.sprite(700, -100, "mira-remoto");
-
     this.iniciarContagem(() => {
       this.passaros.children.entries.forEach((passaro) => {
         passaro.setVelocity(
@@ -209,9 +170,7 @@ export default class fase1 extends Phaser.Scene {
           Phaser.Math.Between(-15, 15)
         );
         passaro.anims.play(
-          passaro.direcao === 1
-            ? "voar-direita-pomba-branca-f1"
-            : "voar-esquerda-pomba-branca-f1",
+          passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
           true
         );
       });
@@ -219,28 +178,23 @@ export default class fase1 extends Phaser.Scene {
   }
 
   configurarSegundoJogador() {
-    globalThis.game.socket.off("answer");
-    globalThis.game.socket.off("candidate");
-
     this.game.localConnection
       .createOffer()
       .then((offer) => this.game.localConnection.setLocalDescription(offer))
       .then(() =>
-        globalThis.game.socket.emit(
+        this.game.socket.emit(
           "offer",
           this.game.sala,
           this.game.localConnection.localDescription
         )
       );
 
-    globalThis.game.socket.on("answer", (description) => {
+    this.game.socket.on("answer", (description) => {
       this.game.localConnection.setRemoteDescription(description);
     });
 
-    globalThis.game.socket.on("candidate", (candidate) => {
-      this.game.localConnection.addIceCandidate(candidate).catch((e) => {
-        console.error("Erro ao adicionar ICE candidate no segundo jogador:", e);
-      });
+    this.game.socket.on("candidate", (candidate) => {
+      this.game.localConnection.addIceCandidate(candidate);
     });
 
     this.personagemLocal = this.physics.add
@@ -293,10 +247,10 @@ export default class fase1 extends Phaser.Scene {
 
     if (dados.passaroAtingido !== undefined) {
       const p = this.passaros.children.entries[dados.passaroAtingido];
-      if (p && globalThis.game.socket.id === this.game.jogadores.primeiro) {
+      if (p && this.game.socket.id === this.game.jogadores.primeiro) {
         p.setVelocity(0, 0);
         p.setTexture("pomba-branca-caindo");
-        p.anims.play("queda", true);
+        p.anims.play("queda-f1", true);
         p.setVelocityY(100);
         p.once("animationcomplete", () => {
           p.setVisible(false);
@@ -310,9 +264,7 @@ export default class fase1 extends Phaser.Scene {
     }
   }
 
-  update () {
-    
-    if (!this.cenaIniciada || !this.passaros) return;
+  update() {
     try {
       // Só envia dados se o canal de dados estiver aberto
       if (this.game.dadosJogo && this.game.dadosJogo.readyState === "open") {
@@ -331,7 +283,7 @@ export default class fase1 extends Phaser.Scene {
         // Só o jogador 1 envia a posição dos pássaros
         if (
           this.passaros &&
-          this.game.jogadores.primeiro === globalThis.game.socket.id
+          this.game.jogadores.primeiro === this.game.socket.id
         ) {
           this.game.dadosJogo.send(
             JSON.stringify({
@@ -339,7 +291,7 @@ export default class fase1 extends Phaser.Scene {
                 x: p.x,
                 y: p.y,
                 texture: p.texture.key,
-                frame: p.frame.index,
+                frame: p.frame.name,
                 visible: p.visible,
               })),
             })
@@ -351,10 +303,7 @@ export default class fase1 extends Phaser.Scene {
     }
 
     // Lógica dos pássaros só para o jogador 1
-    if (
-      this.game.jogadores &&
-      this.game.jogadores.primeiro === globalThis.game.socket.id
-    ) {
+    if (this.game.jogadores.primeiro === this.game.socket.id) {
       const backgroundY = 190;
       const backgroundHeight = 380;
       const topLimit = backgroundY - backgroundHeight / 2;
@@ -369,9 +318,7 @@ export default class fase1 extends Phaser.Scene {
           passaro.direcao *= -1;
           passaro.setVelocityX(passaro.direcao * Phaser.Math.Between(100, 150));
           passaro.anims.play(
-            passaro.direcao === 1
-              ? "voar-direita-pomba-branca-f1"
-              : "voar-esquerda-pomba-branca-f1",
+            passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
             true
           );
         }
@@ -386,8 +333,8 @@ export default class fase1 extends Phaser.Scene {
     // CONTROLE DO GAMEPAD para o jogador local
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
-      const axisH = pad.axes.length > 0 ? pad.axes[0].getValue() : 0;
-      const axisV = pad.axes.length > 1 ? pad.axes[1].getValue() : 0;
+      const axisH = pad.axes[0].getValue();
+      const axisV = pad.axes[1].getValue();
       const botaoTiro = pad.buttons[2].pressed;
 
       this.personagemLocal.setVelocity(this.speed * axisH, this.speed * axisV);
@@ -412,11 +359,11 @@ export default class fase1 extends Phaser.Scene {
             this.score += 100;
             this.scoreText.setText("Pontuação: " + this.score);
 
-            if (globalThis.game.socket.id === this.game.jogadores.primeiro) {
+            if (this.game.socket.id === this.game.jogadores.primeiro) {
               passaro.setTexture("pomba-branca-caindo"); // Troca o spritesheet
               passaro.setVelocityX(0);
               passaro.setVelocityY(100); // Faz cair para baixo
-              passaro.anims.play("queda", true);
+              passaro.anims.play("queda-f1", true);
 
               passaro.once("animationcomplete", () => {
                 console.log("Animação de queda concluída");

@@ -41,7 +41,7 @@ export default class fase5 extends Phaser.Scene {
 
     // Animações
     this.anims.create({
-      key: "voar-branca",
+      key: "voar-branca-f5",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -51,7 +51,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-cinza",
+      key: "voar-cinza-f5",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -61,7 +61,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-corvo",
+      key: "voar-corvo-f5",
       frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
       frameRate: 10,
       repeat: -1,
@@ -89,10 +89,10 @@ export default class fase5 extends Phaser.Scene {
           : "corvo";
       const animacao =
         tipoPassaro === "pomba-branca"
-          ? "voar-branca"
+          ? "voar-branca-f5"
           : tipoPassaro === "pomba-cinza"
-          ? "voar-cinza"
-          : "voar-corvo";
+          ? "voar-cinza-f5"
+          : "voar-corvo-f5";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
