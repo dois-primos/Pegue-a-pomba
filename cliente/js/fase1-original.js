@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class fase1 extends Phaser.Scene {
   constructor() {
     super("fase1");
@@ -68,7 +70,7 @@ export default class fase1 extends Phaser.Scene {
       frameRate: 1,
     });
 
-    if (this.game.jogadores. === this.game.socket.id) {
+    if (this.game.jogadores.primeiro === this.game.socket.id) {
       this.game.remoteConnection = new RTCPeerConnection(this.game.iceServers);
       this.game.dadosJogo = this.game.remoteConnection.createDataChannel(
         "dadosJogo",

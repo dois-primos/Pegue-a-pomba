@@ -38,7 +38,7 @@ export default class finalfeliz extends Phaser.Scene {
                 headers: {
                   Authorization: `Bearer ${res.credential}`,
                 },
-              }
+              },
             )
             .then(function (response) {
               console.log(response);

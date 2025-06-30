@@ -75,7 +75,7 @@ export default class fase2 extends Phaser.Scene {
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80)
+        Phaser.Math.Between(-80, 80),
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -125,7 +125,7 @@ export default class fase2 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds()
+          passaro.getBounds(),
         );
 
         if (

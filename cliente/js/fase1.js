@@ -28,11 +28,11 @@ export default class fase1 extends Phaser.Scene {
       {
         frameWidth: 64,
         frameHeight: 64,
-      }
+      },
     );
   }
 
-  create () {
+  create() {
     this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
 
@@ -144,13 +144,13 @@ export default class fase1 extends Phaser.Scene {
         .setRemoteDescription(description)
         .then(() => this.game.remoteConnection.createAnswer())
         .then((answer) =>
-          this.game.remoteConnection.setLocalDescription(answer)
+          this.game.remoteConnection.setLocalDescription(answer),
         )
         .then(() => {
           this.game.socket.emit(
             "answer",
             this.game.sala,
-            this.game.remoteConnection.localDescription
+            this.game.remoteConnection.localDescription,
           );
         });
     });
@@ -167,11 +167,11 @@ export default class fase1 extends Phaser.Scene {
       this.passaros.children.entries.forEach((passaro) => {
         passaro.setVelocity(
           Phaser.Math.Between(50, 80) * passaro.direcao,
-          Phaser.Math.Between(-15, 15)
+          Phaser.Math.Between(-15, 15),
         );
         passaro.anims.play(
           passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
-          true
+          true,
         );
       });
     });
@@ -185,8 +185,8 @@ export default class fase1 extends Phaser.Scene {
         this.game.socket.emit(
           "offer",
           this.game.sala,
-          this.game.localConnection.localDescription
-        )
+          this.game.localConnection.localDescription,
+        ),
       );
 
     this.game.socket.on("answer", (description) => {
@@ -276,7 +276,7 @@ export default class fase1 extends Phaser.Scene {
                 x: this.personagemLocal.x,
                 y: this.personagemLocal.y,
               },
-            })
+            }),
           );
         }
 
@@ -294,7 +294,7 @@ export default class fase1 extends Phaser.Scene {
                 frame: p.frame.name,
                 visible: p.visible,
               })),
-            })
+            }),
           );
         }
       }
@@ -319,7 +319,7 @@ export default class fase1 extends Phaser.Scene {
           passaro.setVelocityX(passaro.direcao * Phaser.Math.Between(100, 150));
           passaro.anims.play(
             passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
-            true
+            true,
           );
         }
 
@@ -349,7 +349,7 @@ export default class fase1 extends Phaser.Scene {
 
           const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
             this.personagemLocal.getBounds(),
-            passaro.getBounds()
+            passaro.getBounds(),
           );
 
           if (colidiu && !acertou) {
@@ -382,7 +382,7 @@ export default class fase1 extends Phaser.Scene {
                 JSON.stringify({
                   passaroAtingido: i,
                   novoScore: this.score,
-                })
+                }),
               );
             }
           }

@@ -13,7 +13,7 @@ export default class abertura extends Phaser.Scene {
     });
   }
 
-  create () {
+  create() {
     this.add.image(400, 225, "abertura");
 
     this.anims.create({
@@ -34,14 +34,13 @@ export default class abertura extends Phaser.Scene {
         this.scene.stop();
         this.scene.start("sala");
       });
-    
+
     this.input.gamepad.on("down", (pad) => {
       if (pad.buttons[9].pressed) {
         this.scene.stop();
         this.scene.start("sala");
       }
     });
-  
   }
   update() {}
 }

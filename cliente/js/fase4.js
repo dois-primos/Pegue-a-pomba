@@ -1,3 +1,5 @@
+/*global Phaser*/
+/*eslint no-undef: "error"*/
 export default class fase4 extends Phaser.Scene {
   constructor() {
     super("fase4");
@@ -83,19 +85,19 @@ export default class fase4 extends Phaser.Scene {
         Phaser.Math.Between(0, 2) === 0
           ? "pomba-branca"
           : Phaser.Math.Between(0, 1) === 0
-          ? "pomba-cinza"
-          : "corvo";
+            ? "pomba-cinza"
+            : "corvo";
       const animacao =
         tipoPassaro === "pomba-branca"
           ? "voar-branca-f4"
           : tipoPassaro === "pomba-cinza"
-          ? "voar-cinza-f4"
-          : "voar-corvo-f4";
+            ? "voar-cinza-f4"
+            : "voar-corvo-f4";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80)
+        Phaser.Math.Between(-80, 80),
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -151,7 +153,7 @@ export default class fase4 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds()
+          passaro.getBounds(),
         );
 
         if (

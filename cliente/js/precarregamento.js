@@ -11,7 +11,6 @@ export default class precarregamento extends Phaser.Scene {
     this.load.image("mira", "assets/mira.png");
     this.load.image("pomba", "assets/pomba-branca.png");
     this.load.audio("tiro", "assets/tiro.mp3");
-
   }
 
   create() {
