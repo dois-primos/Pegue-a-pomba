@@ -60,7 +60,7 @@ export default class fase1 extends Phaser.Scene {
       key: "queda-f1",
       frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
         start: 0,
-        end: 5,
+        end: 4,
       }),
       frameRate: 12,
       repeat: 0,
