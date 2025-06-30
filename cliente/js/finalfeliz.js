@@ -5,7 +5,9 @@ export default class finalfeliz extends Phaser.Scene {
     super("finalfeliz");
   }
 
-  init() {}
+  init() {
+    this.game.cenaAtual = "finalfeliz";
+  }
 
   preload() {
     // Carregar qualquer imagem, áudio ou outro recurso necessário

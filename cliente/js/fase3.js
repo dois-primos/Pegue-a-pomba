@@ -12,6 +12,10 @@ export default class fase3 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
+  init() {
+    this.game.cenaAtual = "fase3";
+  }
+
   preload() {
     this.load.audio("fire", "assets/fire.mp3");
     this.load.image("mira", "assets/mira.png");

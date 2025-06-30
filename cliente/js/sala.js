@@ -6,6 +6,10 @@ export default class sala extends Phaser.Scene {
     super("sala");
   }
 
+  init() {
+    this.game.cenaAtual = "sala";
+  }
+
   create() {
     this.add.text(10, 10, "Aguardando oponente...");
 

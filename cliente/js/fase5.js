@@ -12,6 +12,10 @@ export default class fase5 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
+  init() {
+    this.game.cenaAtual = "fase5";
+  }
+
   preload() {
     this.load.audio("fire", "assets/fire.mp3");
     this.load.image("mira", "assets/mira.png");

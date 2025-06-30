@@ -5,6 +5,10 @@ export default class abertura extends Phaser.Scene {
     super("abertura");
   }
 
+  init() {
+    this.game.cenaAtual = "abertura";
+  }
+
   preload() {
     this.load.image("abertura", "assets/abertura.png");
     this.load.spritesheet("botao", "assets/botao.png", {

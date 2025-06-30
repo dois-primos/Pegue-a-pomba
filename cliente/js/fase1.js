@@ -11,6 +11,10 @@ export default class fase1 extends Phaser.Scene {
     this.botaoTiroPressionado = false;
   }
 
+  init() {
+    this.game.cenaAtual = "fase1";
+  }
+
   preload() {
     this.load.audio("fire", "assets/fire.mp3");
     this.load.image("mira", "assets/mira.png");
@@ -227,40 +231,42 @@ export default class fase1 extends Phaser.Scene {
 
   receberDados(event) {
     const dados = JSON.parse(event.data);
-    if (dados.personagem) {
-      this.personagemRemoto.x = dados.personagem.x;
-      this.personagemRemoto.y = dados.personagem.y;
-    }
+    if (dados.cena === this.game.cenaAtual) {
+      if (dados.personagem) {
+        this.personagemRemoto.x = dados.personagem.x;
+        this.personagemRemoto.y = dados.personagem.y;
+      }
 
-    if (dados.passaros) {
-      dados.passaros.forEach((passaro, i) => {
-        const p = this.passaros.children.entries[i];
-        if (p) {
-          p.x = passaro.x;
-          p.y = passaro.y;
-          p.setTexture(passaro.texture);
-          p.setFrame(passaro.frame);
-          p.setVisible(passaro.visible);
-        }
-      });
-    }
-
-    if (dados.passaroAtingido !== undefined) {
-      const p = this.passaros.children.entries[dados.passaroAtingido];
-      if (p && this.game.socket.id === this.game.jogadores.primeiro) {
-        p.setVelocity(0, 0);
-        p.setTexture("pomba-branca-caindo");
-        p.anims.play("queda-f1", true);
-        p.setVelocityY(100);
-        p.once("animationcomplete", () => {
-          p.setVisible(false);
+      if (dados.passaros) {
+        dados.passaros.forEach((passaro, i) => {
+          const p = this.passaros.children.entries[i];
+          if (p) {
+            p.x = passaro.x;
+            p.y = passaro.y;
+            p.setTexture(passaro.texture);
+            p.setFrame(passaro.frame);
+            p.setVisible(passaro.visible);
+          }
         });
       }
-    }
+      
+      if (dados.passaroAtingido !== undefined) {
+        const p = this.passaros.children.entries[dados.passaroAtingido];
+        if (p && this.game.socket.id === this.game.jogadores.primeiro) {
+          p.setVelocity(0, 0);
+          p.setTexture("pomba-branca-caindo");
+          p.anims.play("queda-f1", true);
+          p.setVelocityY(100);
+          p.once("animationcomplete", () => {
+            p.setVisible(false);
+          });
+        }
+      }
 
-    if (dados.novoScore !== undefined) {
-      this.scoreRemoto = dados.novoScore;
-      this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
+      if (dados.novoScore) {
+        this.scoreRemoto = dados.novoScore;
+        this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
+      }
     }
   }
 
@@ -272,6 +278,7 @@ export default class fase1 extends Phaser.Scene {
           // Envia posição do personagem local
           this.game.dadosJogo.send(
             JSON.stringify({
+              cena: this.game.cenaAtual,
               personagem: {
                 x: this.personagemLocal.x,
                 y: this.personagemLocal.y,
@@ -287,6 +294,7 @@ export default class fase1 extends Phaser.Scene {
         ) {
           this.game.dadosJogo.send(
             JSON.stringify({
+              cena: this.game.cenaAtual,
               passaros: this.passaros.children.entries.map((p) => ({
                 x: p.x,
                 y: p.y,
@@ -380,6 +388,7 @@ export default class fase1 extends Phaser.Scene {
             ) {
               this.game.dadosJogo.send(
                 JSON.stringify({
+                  cena: this.game.cenaAtual,
                   passaroAtingido: i,
                   novoScore: this.score,
                 }),
