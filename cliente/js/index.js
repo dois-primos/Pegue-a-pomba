@@ -33,6 +33,12 @@ class Game extends Phaser.Game {
       console.log(`Usuário ${this.socket.id} conectado no servidor`);
     });
 
+    this.socket.on("proxima-fase", (dados) => {
+      console.log("Próxima fase recebida:", dados);
+      this.scene.stop(this.cenaAtual);
+      this.scene.start(dados.fase, { score: dados.score });
+    });
+
     this.scene.add("abertura", abertura);
     this.scene.add("precarregamento", precarregamento);
     this.scene.add("sala", sala);

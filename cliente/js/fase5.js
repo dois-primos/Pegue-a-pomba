@@ -4,7 +4,6 @@ export default class fase5 extends Phaser.Scene {
   constructor() {
     super("fase5");
     this.speed = 200;
-    this.score = 0;
     this.tirosRestantes = 14;
     this.passarosRestantes = 12;
     this.maxPassaros = 12;
@@ -14,6 +13,7 @@ export default class fase5 extends Phaser.Scene {
 
   init() {
     this.game.cenaAtual = "fase5";
+    this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
 
   preload() {

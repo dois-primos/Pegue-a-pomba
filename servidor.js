@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
       };
       console.log(
         "Sala %s com 2 jogadores. Partida pronta para iniciar.",
-        sala,
+        sala
       );
     }
 
@@ -49,10 +49,14 @@ io.on("connection", (socket) => {
     io.socketsLeave(sala);
   });
 
+  socket.on("proxima-fase", (sala, dados) => {
+    socket.to(sala).emit("proxima-fase", dados);
+  });
+
   socket.on("disconnect", () => {});
 });
 
 app.use(express.static("./cliente/"));
 server.listen(PORT, () =>
-  console.log(`Servidor em execução na porta ${PORT}!`),
+  console.log(`Servidor em execução na porta ${PORT}!`)
 );

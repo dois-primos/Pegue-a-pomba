@@ -4,7 +4,6 @@ export default class fase3 extends Phaser.Scene {
   constructor() {
     super("fase3");
     this.speed = 200;
-    this.score = 0;
     this.tirosRestantes = 10;
     this.passarosRestantes = 8; // Quantos precisam ser abatidos
     this.maxPassaros = 8; // Limite total de pombas geradas
@@ -14,6 +13,7 @@ export default class fase3 extends Phaser.Scene {
 
   init() {
     this.game.cenaAtual = "fase3";
+    this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
 
   preload() {

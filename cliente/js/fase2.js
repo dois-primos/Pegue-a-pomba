@@ -4,7 +4,6 @@ export default class fase2 extends Phaser.Scene {
   constructor() {
     super("fase2");
     this.speed = 200;
-    this.score = 0;
     this.tirosRestantes = 8;
     this.passarosRestantes = 6;
     this.maxPassaros = 6;
@@ -12,8 +11,9 @@ export default class fase2 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  init() {
+  init(data) {
     this.game.cenaAtual = "fase2";
+    this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
 
   preload() {
@@ -79,7 +79,7 @@ export default class fase2 extends Phaser.Scene {
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80),
+        Phaser.Math.Between(-80, 80)
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -129,7 +129,7 @@ export default class fase2 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds(),
+          passaro.getBounds()
         );
 
         if (
@@ -194,13 +194,13 @@ export default class fase2 extends Phaser.Scene {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
-        this.irParaFase3();
+        this.game.socket.emit("proxima-fase", {
+          fase: "fase3",
+          score: this.score,
+        });
+        this.scene.stop(this.game.cenaAtual);
+        this.scene.start("fase3");
       });
     }
-  }
-
-  irParaFase3() {
-    this.scene.stop("fase2");
-    this.scene.start("fase3");
   }
 }
