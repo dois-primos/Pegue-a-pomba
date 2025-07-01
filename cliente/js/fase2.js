@@ -4,14 +4,15 @@ export default class fase2 extends Phaser.Scene {
   constructor() {
     super("fase2");
     this.speed = 200;
-    this.tirosRestantes = 8;
-    this.passarosRestantes = 6;
-    this.maxPassaros = 6;
+    this.tirosRestantes = 10;
+    this.scoreRemoto = 0;
+    this.passarosRestantes = 8; // Quantos precisam ser abatidos
+    this.maxPassaros = 8; // Limite total de pombas geradas
     this.totalPassarosGerados = 0;
     this.aguardandoNovaRodada = false;
   }
 
-  init(data) {
+  init() {
     this.game.cenaAtual = "fase2";
     this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
@@ -39,8 +40,9 @@ export default class fase2 extends Phaser.Scene {
     this.passaros = this.physics.add.group();
     this.tempoParaNovoPassaro = 0;
 
+    // Criação de animações
     this.anims.create({
-      key: "voar-branca-f2",
+      key: "voar-branca-f3",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -50,7 +52,7 @@ export default class fase2 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-cinza-f2",
+      key: "voar-cinza-f3",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -59,6 +61,7 @@ export default class fase2 extends Phaser.Scene {
       repeat: -1,
     });
 
+    // Função para gerar pássaros
     this.spawnPassaro = () => {
       if (this.totalPassarosGerados >= this.maxPassaros) return;
 
@@ -71,10 +74,11 @@ export default class fase2 extends Phaser.Scene {
       const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
       const x = direcao === 1 ? -50 : 850;
 
+      // Escolher aleatoriamente entre pomba branca ou cinza
       const tipoPassaro =
         Phaser.Math.Between(0, 1) === 0 ? "pomba-branca" : "pomba-cinza";
       const animacao =
-        tipoPassaro === "pomba-branca" ? "voar-branca-f2" : "voar-cinza-f2";
+        tipoPassaro === "pomba-branca" ? "voar-branca-f3" : "voar-cinza-f3";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
@@ -89,15 +93,13 @@ export default class fase2 extends Phaser.Scene {
       this.totalPassarosGerados++;
     };
 
-    // Recupera pontuação acumulada
-    const scoreAnterior = this.registry.get("score") || 0;
-    this.score = scoreAnterior;
-
+    // Inicialização de variáveis
+    this.score = this.registry.get("score") || 0;
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
       fill: "#fff",
     });
-    this.tirosText = this.add.text(16, 60, "Tiros: 8", {
+    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
       fontSize: "28px",
       fill: "#fff",
     });
@@ -106,6 +108,14 @@ export default class fase2 extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(1);
 
+    // Função para atualizar pontuação
+    this.atualizarPontuacao = (valor) => {
+      this.score += valor;
+      this.registry.set("score", this.score);
+      this.scoreText.setText("Pontuação: " + this.score);
+    };
+
+    // Controle de gamepad (sem alterações)
     this.input.gamepad.once("connected", (pad) => {
       this.gamepad = pad;
       pad.on("down", (index) => {
@@ -142,11 +152,9 @@ export default class fase2 extends Phaser.Scene {
           passaro.acertado = true;
           passaro.destroy();
           this.fire.play();
-          this.score += 10;
+          this.atualizarPontuacao(10); // Pontuação aumentada
           this.passarosRestantes--;
           this.tirosRestantes--;
-          this.registry.set("score", this.score); // Atualiza pontuação no registry
-          this.scoreText.setText("Pontuação: " + this.score);
           this.tirosText.setText("Tiros: " + this.tirosRestantes);
           this.ultimoTiro = true;
         }
@@ -162,6 +170,7 @@ export default class fase2 extends Phaser.Scene {
       if (!botaoTiro) this.ultimoTiro = false;
     }
 
+    // Limite no número de pássaros em tela
     if (!this.aguardandoNovaRodada && this.passarosRestantes > 0) {
       this.tempoParaNovoPassaro += delta;
       if (this.tempoParaNovoPassaro > 1500) {
@@ -172,6 +181,7 @@ export default class fase2 extends Phaser.Scene {
       }
     }
 
+    // Remove os pássaros que saem da tela e reduz o contador
     this.passaros.getChildren().forEach((passaro) => {
       if (
         passaro.x < -60 ||
@@ -186,6 +196,7 @@ export default class fase2 extends Phaser.Scene {
       }
     });
 
+    // Verifica fim da fase
     if (
       this.passarosRestantes === 0 &&
       this.tirosRestantes >= 0 &&

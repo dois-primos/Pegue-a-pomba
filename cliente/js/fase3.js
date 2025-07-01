@@ -4,9 +4,10 @@ export default class fase3 extends Phaser.Scene {
   constructor() {
     super("fase3");
     this.speed = 200;
-    this.tirosRestantes = 10;
-    this.passarosRestantes = 8; // Quantos precisam ser abatidos
-    this.maxPassaros = 8; // Limite total de pombas geradas
+    this.tirosRestantes = 14;
+    this.scoreRemoto = 0;
+    this.passarosRestantes = 12;
+    this.maxPassaros = 12;
     this.totalPassarosGerados = 0;
     this.aguardandoNovaRodada = false;
   }
@@ -28,6 +29,10 @@ export default class fase3 extends Phaser.Scene {
       frameWidth: 64,
       frameHeight: 64,
     });
+    this.load.spritesheet("corvo", "assets/corvo.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
   }
 
   create() {
@@ -39,9 +44,9 @@ export default class fase3 extends Phaser.Scene {
     this.passaros = this.physics.add.group();
     this.tempoParaNovoPassaro = 0;
 
-    // Criação de animações
+    // Animações
     this.anims.create({
-      key: "voar-branca-f3",
+      key: "voar-branca-f5",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -51,7 +56,7 @@ export default class fase3 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-cinza-f3",
+      key: "voar-cinza-f5",
       frames: this.anims.generateFrameNumbers("pomba-cinza", {
         start: 0,
         end: 5,
@@ -60,7 +65,14 @@ export default class fase3 extends Phaser.Scene {
       repeat: -1,
     });
 
-    // Função para gerar pássaros
+    this.anims.create({
+      key: "voar-corvo-f5",
+      frames: this.anims.generateFrameNumbers("corvo", { start: 0, end: 5 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Função para gerar pássaros e corvos
     this.spawnPassaro = () => {
       if (this.totalPassarosGerados >= this.maxPassaros) return;
 
@@ -73,16 +85,24 @@ export default class fase3 extends Phaser.Scene {
       const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
       const x = direcao === 1 ? -50 : 850;
 
-      // Escolher aleatoriamente entre pomba branca ou cinza
+      // Escolher aleatoriamente entre pomba branca, cinza ou corvo
       const tipoPassaro =
-        Phaser.Math.Between(0, 1) === 0 ? "pomba-branca" : "pomba-cinza";
+        Phaser.Math.Between(0, 2) === 0
+          ? "pomba-branca"
+          : Phaser.Math.Between(0, 1) === 0
+          ? "pomba-cinza"
+          : "corvo";
       const animacao =
-        tipoPassaro === "pomba-branca" ? "voar-branca-f3" : "voar-cinza-f3";
+        tipoPassaro === "pomba-branca"
+          ? "voar-branca-f5"
+          : tipoPassaro === "pomba-cinza"
+          ? "voar-cinza-f5"
+          : "voar-corvo-f5";
 
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80),
+        Phaser.Math.Between(-80, 80)
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -138,7 +158,7 @@ export default class fase3 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds(),
+          passaro.getBounds()
         );
 
         if (
@@ -151,7 +171,11 @@ export default class fase3 extends Phaser.Scene {
           passaro.acertado = true;
           passaro.destroy();
           this.fire.play();
-          this.atualizarPontuacao(10); // Pontuação aumentada
+          if (passaro.texture.key === "corvo") {
+            this.atualizarPontuacao(-5); // Perde pontos ao acertar o corvo
+          } else {
+            this.atualizarPontuacao(10); // Pontuação normal para as pombas
+          }
           this.passarosRestantes--;
           this.tirosRestantes--;
           this.tirosText.setText("Tiros: " + this.tirosRestantes);
@@ -172,7 +196,8 @@ export default class fase3 extends Phaser.Scene {
     // Limite no número de pássaros em tela
     if (!this.aguardandoNovaRodada && this.passarosRestantes > 0) {
       this.tempoParaNovoPassaro += delta;
-      if (this.tempoParaNovoPassaro > 1500) {
+      if (this.tempoParaNovoPassaro > 1200) {
+        // Menor tempo entre os pássaros
         this.tempoParaNovoPassaro = 0;
         if (this.passaros.countActive(true) < this.maxPassaros) {
           this.spawnPassaro();
@@ -204,13 +229,13 @@ export default class fase3 extends Phaser.Scene {
       this.aguardandoNovaRodada = true;
       this.rodadaText.setText("Fase Completa!");
       this.time.delayedCall(2000, () => {
-        this.irParaFase4();
+        this.game.socket.emit("proxima-fase", {
+          fase: "fase4",
+          score: this.score,
+        });
+        this.scene.stop(this.game.cenaAtual);
+        this.scene.start("fase4");
       });
     }
-  }
-
-  irParaFase4() {
-    this.scene.stop("fase3");
-    this.scene.start("fase4");
   }
 }
