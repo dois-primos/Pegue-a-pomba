@@ -12,7 +12,7 @@ export default class fase2 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  init() {
+  init(data) {
     this.game.cenaAtual = "fase2";
     this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
@@ -83,7 +83,7 @@ export default class fase2 extends Phaser.Scene {
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80)
+        Phaser.Math.Between(-80, 80),
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -94,7 +94,6 @@ export default class fase2 extends Phaser.Scene {
     };
 
     // Inicialização de variáveis
-    this.score = this.registry.get("score") || 0;
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
       fill: "#fff",
@@ -139,7 +138,7 @@ export default class fase2 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds()
+          passaro.getBounds(),
         );
 
         if (

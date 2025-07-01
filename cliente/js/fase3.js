@@ -12,7 +12,7 @@ export default class fase3 extends Phaser.Scene {
     this.aguardandoNovaRodada = false;
   }
 
-  init() {
+  init(data) {
     this.game.cenaAtual = "fase3";
     this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
@@ -113,7 +113,6 @@ export default class fase3 extends Phaser.Scene {
     };
 
     // Inicialização de variáveis
-    this.score = this.registry.get("score") || 0;
     this.scoreText = this.add.text(16, 16, "Pontuação: " + this.score, {
       fontSize: "32px",
       fill: "#fff",

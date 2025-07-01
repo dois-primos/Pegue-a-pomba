@@ -10,7 +10,7 @@ export default class fase5 extends Phaser.Scene {
     this.botaoTiroPressionado = false;
   }
 
-  init() {
+  init(data) {
     this.game.cenaAtual = "fase5";
     this.score = data.score || 0; // Recupera a pontuação da fase anterior
   }
