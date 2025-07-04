@@ -41,7 +41,7 @@ export default class fase5 extends Phaser.Scene {
     this.fire = this.sound.add("fire");
 
     this.anims.create({
-      key: "voar-direita-f1",
+      key: "voar-direita-f5",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 0,
         end: 5,
@@ -51,7 +51,7 @@ export default class fase5 extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "voar-esquerda-f1",
+      key: "voar-esquerda-f5",
       frames: this.anims.generateFrameNumbers("pomba-branca", {
         start: 6,
         end: 11,
@@ -174,7 +174,7 @@ export default class fase5 extends Phaser.Scene {
           Phaser.Math.Between(-15, 15)
         );
         passaro.anims.play(
-          passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
+          passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
           true
         );
       });
@@ -326,7 +326,7 @@ export default class fase5 extends Phaser.Scene {
           passaro.direcao *= -1;
           passaro.setVelocityX(passaro.direcao * Phaser.Math.Between(100, 150));
           passaro.anims.play(
-            passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
+            passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
             true
           );
         }

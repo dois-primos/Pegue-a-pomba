@@ -5,9 +5,9 @@ import abertura from "./abertura.js";
 import precarregamento from "./precarregamento.js";
 import fase1 from "./fase1.js";
 import fase2 from "./fase2.js";
-//import fase3 from "./fase3.js";
-//import fase4 from "./fase4.js";
-//import fase5 from "./fase5.js";
+import fase3 from "./fase3.js";
+import fase4 from "./fase4.js";
+import fase5 from "./fase5.js";
 import gameover from "./gameover.js";
 import finalfeliz from "./finalfeliz.js";
 import sala from "./sala.js";
@@ -46,6 +46,9 @@ class Game extends Phaser.Game {
     this.scene.add("sala", sala);
     this.scene.add("fase1", fase1);
     this.scene.add("fase2", fase2);
+    this.scene.add("fase3", fase3);
+    this.scene.add("fase4", fase4);
+    this.scene.add("fase5", fase5);
     this.scene.add("gameover", gameover);
     this.scene.add("finalfeliz", finalfeliz);
 
