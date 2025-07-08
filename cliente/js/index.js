@@ -20,6 +20,8 @@ class Game extends Phaser.Game {
     this.iceServers = {
       iceServers: [
         {
+          urls: "stun:feira-de-jogos.dev.br",
+        },
           urls: "turns:feira-de-jogos.dev.br",
           username: "adc20251",
           credential: "adc20251",
