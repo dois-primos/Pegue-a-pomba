@@ -8,11 +8,14 @@ export default class fase5 extends Phaser.Scene {
     this.scoreRemoto = 0;
     this.tirosRestantes = 20;
     this.botaoTiroPressionado = false;
+    this.ultimoTiro = false;
+    this.totalPassarosGerados = 0;
+    this.maxPassaros = 15;
   }
 
   init(data) {
     this.game.cenaAtual = "fase5";
-    this.score = data.score || 0; // Recupera a pontuação da fase anterior
+    this.score = data.score || 0;
   }
 
   preload() {
@@ -20,20 +23,14 @@ export default class fase5 extends Phaser.Scene {
     this.load.image("mira", "assets/mira.png");
     this.load.image("mira-remoto", "assets/mira-remoto.png");
     this.load.image("background", "assets/background.png");
-
     this.load.spritesheet("pomba-branca", "assets/pomba-branca.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-
-    this.load.spritesheet(
-      "pomba-branca-caindo",
-      "assets/pomba-branca-caindo.png",
-      {
-        frameWidth: 64,
-        frameHeight: 64,
-      }
-    );
+    this.load.spritesheet("pomba-branca-caindo", "assets/pomba-branca-caindo.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
   }
 
   create() {
@@ -42,46 +39,30 @@ export default class fase5 extends Phaser.Scene {
 
     this.anims.create({
       key: "voar-direita-f5",
-      frames: this.anims.generateFrameNumbers("pomba-branca", {
-        start: 0,
-        end: 5,
-      }),
+      frames: this.anims.generateFrameNumbers("pomba-branca", { start: 0, end: 5 }),
       frameRate: 12,
       repeat: -1,
     });
 
     this.anims.create({
       key: "voar-esquerda-f5",
-      frames: this.anims.generateFrameNumbers("pomba-branca", {
-        start: 6,
-        end: 11,
-      }),
+      frames: this.anims.generateFrameNumbers("pomba-branca", { start: 6, end: 11 }),
       frameRate: 12,
       repeat: -1,
     });
 
-    this.anims.create({
-      key: "queda-f1",
-      frames: this.anims.generateFrameNumbers("pomba-branca-caindo", {
-        start: 0,
-        end: 4,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
-
     this.passaros = this.physics.add.group();
-    for (let i = 0; i < 15; i++) {
-      const backgroundY = 190;
-      const backgroundHeight = 380;
-      const topLimit = backgroundY - backgroundHeight / 2;
-      const bottomLimit = backgroundY + backgroundHeight / 2;
-      const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
-      const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-      const x = direcao === 1 ? -50 : 850;
-      const passaro = this.passaros.create(x, y, "pomba-branca");
-      passaro.direcao = direcao;
-    }
+
+    this.iniciarContagem(() => {
+      if (this.game.jogadores.primeiro === this.game.socket.id) {
+        this.criarRevoadaInicial();
+        this.time.addEvent({
+          delay: 3000,
+          callback: () => this.spawnPassaroPrimeiraRevoada(),
+          loop: true,
+        });
+      }
+    });
 
     this.initConexao();
 
@@ -89,22 +70,93 @@ export default class fase5 extends Phaser.Scene {
       fontSize: "32px",
       fill: "#fff",
     });
-
     this.scoreRemotoText = this.add.text(560, 16, "Adversário: 0", {
       fontSize: "28px",
       fill: "#fff",
     });
-
     this.tirosText = this.add.text(16, 60, "Tiros: 20", {
       fontSize: "28px",
       fill: "#fff",
     });
 
     this.input.gamepad.on("down", (pad) => {
-      if (pad.buttons[9].pressed) {
-        window.location.reload();
-      }
+      if (pad.buttons[9].pressed) window.location.reload();
     });
+  }
+
+  criarRevoadaInicial() {
+    for (let i = 0; i < 15; i++) {
+      this.spawnPassaroPrimeiraRevoada();
+    }
+  }
+
+  spawnPassaroPrimeiraRevoada() {
+    if (this.totalPassarosGerados >= this.maxPassaros) return;
+    const backgroundY = 190;
+    const backgroundHeight = 380;
+    const topLimit = backgroundY - backgroundHeight / 2;
+    const bottomLimit = backgroundY + backgroundHeight / 2;
+    const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
+    const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+    const x = direcao === 1 ? -50 : 850;
+    const tipoPassaro = "pomba-branca";
+    const animacao = direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5";
+    const passaro = this.passaros.create(x, y, tipoPassaro);
+    passaro.setVelocity(
+      Phaser.Math.Between(100, 150) * direcao,
+      Phaser.Math.Between(-80, 80)
+    );
+    passaro.direcao = direcao;
+    passaro.acertado = false;
+    if (this.game.jogadores.primeiro === this.game.socket.id) {
+      passaro.anims.play(animacao, true);
+    }
+    this.totalPassarosGerados++;
+  }
+
+  receberDados(event) {
+    const dados = JSON.parse(event.data);
+    if (dados.cena === this.game.cenaAtual) {
+      if (dados.personagem && this.personagemRemoto) {
+        this.personagemRemoto.x = dados.personagem.x;
+        this.personagemRemoto.y = dados.personagem.y;
+      }
+
+      if (dados.passaros) {
+        dados.passaros.forEach((passaro, i) => {
+          let p = this.passaros.children.entries[i];
+          if (!p) p = this.passaros.create(passaro.x, passaro.y, passaro.texture);
+
+          p.x = passaro.x;
+          p.y = passaro.y;
+          p.setTexture(passaro.texture);
+          p.setFrame(passaro.frame);
+          p.setVisible(passaro.visible);
+          p.direcao = passaro.direcao;
+
+          if (!p.anims.isPlaying && p.visible) {
+            const anim = p.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5";
+            p.anims.play(anim, true);
+          }
+        });
+      }
+
+      if (dados.passaroAtingido !== undefined) {
+        const p = this.passaros.children.entries[dados.passaroAtingido];
+        if (p && this.game.socket.id === this.game.jogadores.primeiro) {
+          p.setVelocity(0, 0);
+          p.setTexture("pomba-branca-caindo");
+          p.setFrame(0);
+          p.setVelocityY(100);
+          this.time.delayedCall(800, () => p.setVisible(false));
+        }
+      }
+
+      if (dados.novoScore) {
+        this.scoreRemoto = dados.novoScore;
+        this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
+      }
+    }
   }
 
   initConexao() {
@@ -166,17 +218,22 @@ export default class fase5 extends Phaser.Scene {
     this.personagemLocal = this.physics.add
       .sprite(225, 225, "mira")
       .setCollideWorldBounds(true);
+
     this.personagemRemoto = this.add.sprite(700, -100, "mira-remoto");
+
     this.iniciarContagem(() => {
       this.passaros.children.entries.forEach((passaro) => {
         passaro.setVelocity(
           Phaser.Math.Between(50, 80) * passaro.direcao,
           Phaser.Math.Between(-15, 15)
         );
-        passaro.anims.play(
-          passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
-          true
-        );
+
+        // Se não quiser mais inverter sprite nem aplicar animação, remova as linhas abaixo:
+        // passaro.setFlipX(passaro.direcao === -1);
+        // passaro.anims.play(
+        //   passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
+        //   true
+        // );
       });
     });
   }
@@ -209,65 +266,27 @@ export default class fase5 extends Phaser.Scene {
   }
 
   iniciarContagem(callback) {
+    let i = 5;
     this.contador = this.add
-      .text(400, 200, "5", {
+      .text(400, 200, "", {
         fontSize: "128px",
         fill: "#fff",
       })
       .setOrigin(0.5);
 
-    let i = 5;
-    const intervalo = setInterval(() => {
-      i--;
-      this.contador.setText(i.toString());
-
-      if (i <= 0) {
-        clearInterval(intervalo);
-        this.contador.destroy();
-        if (callback) callback();
-      }
-    }, 1000);
-  }
-
-  receberDados(event) {
-    const dados = JSON.parse(event.data);
-    if (dados.cena === this.game.cenaAtual) {
-      if (dados.personagem) {
-        this.personagemRemoto.x = dados.personagem.x;
-        this.personagemRemoto.y = dados.personagem.y;
-      }
-
-      if (dados.passaros) {
-        dados.passaros.forEach((passaro, i) => {
-          const p = this.passaros.children.entries[i];
-          if (p) {
-            p.x = passaro.x;
-            p.y = passaro.y;
-            p.setTexture(passaro.texture);
-            p.setFrame(passaro.frame);
-            p.setVisible(passaro.visible);
-          }
-        });
-      }
-
-      if (dados.passaroAtingido !== undefined) {
-        const p = this.passaros.children.entries[dados.passaroAtingido];
-        if (p && this.game.socket.id === this.game.jogadores.primeiro) {
-          p.setVelocity(0, 0);
-          p.setTexture("pomba-branca-caindo");
-          p.anims.play("queda-f1", true);
-          p.setVelocityY(100);
-          p.once("animationcomplete", () => {
-            p.setVisible(false);
-          });
+    this.time.addEvent({
+      delay: 1000,
+      repeat: 5,
+      callback: () => {
+        if (i > 0) {
+          this.contador.setText(i.toString());
+        } else {
+          this.contador.setVisible(false);
+          if (callback) callback();
         }
-      }
-
-      if (dados.novoScore) {
-        this.scoreRemoto = dados.novoScore;
-        this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
-      }
-    }
+        i--;
+      },
+    });
   }
 
   update() {
@@ -301,6 +320,7 @@ export default class fase5 extends Phaser.Scene {
                 texture: p.texture.key,
                 frame: p.frame.name,
                 visible: p.visible,
+                direcao: p.direcao,
               })),
             })
           );
@@ -368,10 +388,10 @@ export default class fase5 extends Phaser.Scene {
             this.scoreText.setText("Pontuação: " + this.score);
 
             if (this.game.socket.id === this.game.jogadores.primeiro) {
-              passaro.setTexture("pomba-branca-caindo"); // Troca o spritesheet
-              passaro.setVelocityX(0);
-              passaro.setVelocityY(100); // Faz cair para baixo
-              passaro.anims.play("queda-f1", true);
+              passaro.setTexture("pomba-branca-caindo");
+              passaro.setFrame(0);
+              passaro.setVelocityY(100);
+              this.time.delayedCall(800, () => passaro.setVisible(false));
 
               passaro.once("animationcomplete", () => {
                 console.log("Animação de queda concluída");
@@ -409,6 +429,25 @@ export default class fase5 extends Phaser.Scene {
       // Reset do botão de tiro quando soltar
       if (!botaoTiro) {
         this.botaoTiroPressionado = false;
+      }
+    }
+    // Verifica se o jogador 1 venceu
+    if (this.game.jogadores.primeiro === this.game.socket.id) {
+      if (this.score >= 1000) {
+        this.game.socket.emit("proxima-fase", {
+          fase: "finalfeliz",
+          score: this.score,
+        });
+      }
+    }
+
+    // Verifica se o jogador 2 venceu
+    else if (this.game.jogadores.segundo === this.game.socket.id) {
+      if (this.scoreRemoto >= 1000) {
+        this.game.socket.emit("proxima-fase", {
+          fase: "finalfeliz",
+          score: this.scoreRemoto,
+        });
       }
     }
   }

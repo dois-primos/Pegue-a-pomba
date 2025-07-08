@@ -21,7 +21,7 @@ export default class sala extends Phaser.Scene {
       if (jogadores.segundo) {
         this.game.jogadores = jogadores;
         this.scene.stop("sala");
-        this.scene.start("fase1");
+        this.scene.start("fase5");
       }
     });
   }
