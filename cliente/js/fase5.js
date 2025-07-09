@@ -19,7 +19,9 @@ export default class fase5 extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio("musica-de-fundo", "assets/musica-de-fundo.mp3");
     this.load.audio("fire", "assets/fire.mp3");
+
     this.load.image("mira", "assets/mira.png");
     this.load.image("mira-remoto", "assets/mira-remoto.png");
     this.load.image("background", "assets/background.png");
@@ -50,8 +52,12 @@ export default class fase5 extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(400, 190, "background");
     this.fire = this.sound.add("fire");
+    this.musicaDeFundo = this.sound
+      .add("musica-de-fundo", { loop: true })
+      .play();
+
+    this.add.image(400, 190, "background");
 
     this.anims.create({
       key: "voar-direita-pomba-branca",
