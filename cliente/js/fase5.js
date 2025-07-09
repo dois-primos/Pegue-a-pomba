@@ -6,7 +6,7 @@ export default class fase5 extends Phaser.Scene {
     super("fase5");
     this.speed = 200;
     this.scoreRemoto = 0;
-    this.tirosRestantes = 20;
+    this.tirosRestantes = 10;
     this.botaoTiroPressionado = false;
     this.ultimoTiro = false;
     this.totalPassarosGerados = 0;
@@ -23,14 +23,30 @@ export default class fase5 extends Phaser.Scene {
     this.load.image("mira", "assets/mira.png");
     this.load.image("mira-remoto", "assets/mira-remoto.png");
     this.load.image("background", "assets/background.png");
+
     this.load.spritesheet("pomba-branca", "assets/pomba-branca.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
-    this.load.spritesheet("pomba-branca-caindo", "assets/pomba-branca-caindo.png", {
+
+    this.load.spritesheet("pomba-cinza", "assets/pomba-cinza.png", {
       frameWidth: 64,
       frameHeight: 64,
     });
+
+    this.load.spritesheet("corvo", "assets/corvo.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+
+    this.load.spritesheet(
+      "pomba-branca-caindo",
+      "assets/pomba-branca-caindo.png",
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
+    );
   }
 
   create() {
@@ -38,15 +54,61 @@ export default class fase5 extends Phaser.Scene {
     this.fire = this.sound.add("fire");
 
     this.anims.create({
-      key: "voar-direita-f5",
-      frames: this.anims.generateFrameNumbers("pomba-branca", { start: 0, end: 5 }),
+      key: "voar-direita-pomba-branca",
+      frames: this.anims.generateFrameNumbers("pomba-branca", {
+        start: 0,
+        end: 5,
+      }),
       frameRate: 12,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "voar-esquerda-f5",
-      frames: this.anims.generateFrameNumbers("pomba-branca", { start: 6, end: 11 }),
+      key: "voar-esquerda-pomba-branca",
+      frames: this.anims.generateFrameNumbers("pomba-branca", {
+        start: 6,
+        end: 11,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "voar-direita-pomba-cinza",
+      frames: this.anims.generateFrameNumbers("pomba-cinza", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "voar-esquerda-pomba-cinza",
+      frames: this.anims.generateFrameNumbers("pomba-cinza", {
+        start: 6,
+        end: 11,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "voar-direita-corvo",
+      frames: this.anims.generateFrameNumbers("corvo", {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "voar-esquerda-corvo",
+      frames: this.anims.generateFrameNumbers("corvo", {
+        start: 6,
+        end: 11,
+      }),
       frameRate: 12,
       repeat: -1,
     });
@@ -56,11 +118,10 @@ export default class fase5 extends Phaser.Scene {
     this.iniciarContagem(() => {
       if (this.game.jogadores.primeiro === this.game.socket.id) {
         this.criarRevoadaInicial();
-        this.time.addEvent({
-          delay: 3000,
-          callback: () => this.spawnPassaroPrimeiraRevoada(),
-          loop: true,
-        });
+
+        setInterval(() => {
+          this.criarProximaRevoada();
+        }, 10000);
       }
     });
 
@@ -74,7 +135,7 @@ export default class fase5 extends Phaser.Scene {
       fontSize: "28px",
       fill: "#fff",
     });
-    this.tirosText = this.add.text(16, 60, "Tiros: 20", {
+    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
       fontSize: "28px",
       fill: "#fff",
     });
@@ -92,26 +153,82 @@ export default class fase5 extends Phaser.Scene {
 
   spawnPassaroPrimeiraRevoada() {
     if (this.totalPassarosGerados >= this.maxPassaros) return;
+
     const backgroundY = 190;
     const backgroundHeight = 380;
     const topLimit = backgroundY - backgroundHeight / 2;
     const bottomLimit = backgroundY + backgroundHeight / 2;
     const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
+
     const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
     const x = direcao === 1 ? -50 : 850;
-    const tipoPassaro = "pomba-branca";
-    const animacao = direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5";
+
+    const texturas = ["pomba-branca", "pomba-cinza", "corvo"];
+    const tipoPassaro = texturas[Math.floor(Math.random() * 3)];
+
+    const animacao =
+      direcao === 1
+        ? "voar-direita-" + tipoPassaro
+        : "voar-esquerda-" + tipoPassaro;
+
     const passaro = this.passaros.create(x, y, tipoPassaro);
-    passaro.setVelocity(
-      Phaser.Math.Between(100, 150) * direcao,
-      Phaser.Math.Between(-80, 80)
-    );
+
+    const atraso = Math.random() * 5000;
+    console.log(atraso);
+    setTimeout(() => {
+      passaro.setVelocity(
+        Phaser.Math.Between(100, 150) * direcao,
+        Phaser.Math.Between(-80, 80)
+      );
+    }, atraso);
+
     passaro.direcao = direcao;
     passaro.acertado = false;
+
     if (this.game.jogadores.primeiro === this.game.socket.id) {
       passaro.anims.play(animacao, true);
     }
+
     this.totalPassarosGerados++;
+  }
+
+  criarProximaRevoada() {
+    this.passaros.children.iterate((passaro) => {
+      const backgroundY = 190;
+      const backgroundHeight = 380;
+      const topLimit = backgroundY - backgroundHeight / 2;
+      const bottomLimit = backgroundY + backgroundHeight / 2;
+      const y = Phaser.Math.Between(topLimit + 20, bottomLimit - 20);
+      passaro.y = y;
+
+      const direcao = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+      const x = direcao === 1 ? -50 : 850;
+      passaro.x = x;
+
+      const atraso = Math.random() * 5000;
+      console.log(atraso);
+      setTimeout(() => {
+        passaro.setVelocity(
+          Phaser.Math.Between(100, 150) * direcao,
+          Phaser.Math.Between(-80, 80)
+        );
+      }, atraso);
+
+      passaro.direcao = direcao;
+      passaro.acertado = false;
+
+      if (this.game.jogadores.primeiro === this.game.socket.id) {
+        const texturas = ["pomba-branca", "pomba-cinza", "corvo"];
+        passaro.setTexture(texturas[Math.floor(Math.random() * 3)]);
+        const animacao =
+          direcao === 1
+            ? "voar-direita-" + passaro.texture.key
+            : "voar-esquerda-" + passaro.texture.key;
+        passaro.anims.play(animacao, true);
+      }
+
+      this.tirosRestantes = 10;
+    });
   }
 
   receberDados(event) {
@@ -125,7 +242,8 @@ export default class fase5 extends Phaser.Scene {
       if (dados.passaros) {
         dados.passaros.forEach((passaro, i) => {
           let p = this.passaros.children.entries[i];
-          if (!p) p = this.passaros.create(passaro.x, passaro.y, passaro.texture);
+          if (!p)
+            p = this.passaros.create(passaro.x, passaro.y, passaro.texture);
 
           p.x = passaro.x;
           p.y = passaro.y;
@@ -135,7 +253,10 @@ export default class fase5 extends Phaser.Scene {
           p.direcao = passaro.direcao;
 
           if (!p.anims.isPlaying && p.visible) {
-            const anim = p.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5";
+            const anim =
+              p.direcao === 1
+                ? "voar-direita-" + p.texture.key
+                : "voar-esquerda-" + p.texture.key;
             p.anims.play(anim, true);
           }
         });
@@ -346,7 +467,9 @@ export default class fase5 extends Phaser.Scene {
           passaro.direcao *= -1;
           passaro.setVelocityX(passaro.direcao * Phaser.Math.Between(100, 150));
           passaro.anims.play(
-            passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
+            passaro.direcao === 1
+              ? "voar-direita-" + passaro.texture.key
+              : "voar-esquerda-" + passaro.texture.key,
             true
           );
         }
@@ -384,7 +507,9 @@ export default class fase5 extends Phaser.Scene {
             acertou = true;
             passaro.atingido = true; // Marca como atingido para bloquear movimento
 
-            this.score += 100;
+            if (passaro.texture.key === "pomba-branca") this.score += 50;
+            else if (passaro.texture.key === "pomba-cinza") this.score += 100;
+            else if (passaro.texture.key === "corvo") this.score -= 50;
             this.scoreText.setText("Pontuação: " + this.score);
 
             if (this.game.socket.id === this.game.jogadores.primeiro) {
