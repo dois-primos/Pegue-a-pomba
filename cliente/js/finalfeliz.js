@@ -13,14 +13,10 @@ export default class finalfeliz extends Phaser.Scene {
   preload() {
     // Carregar qualquer imagem, áudio ou outro recurso necessário
     this.load.image("final-feliz", "assets/final-feliz.png"); // Fundo para o final feliz
-    //this.load.audio("happyMusic", "assets/happy_music.mp3"); // Música alegre (opcional)
   }
 
   create() {
     this.add.image(400, 230, "final-feliz");
-
-    // Música alegre
-    // this.happyMusic = this.sound.add("happyMusic").play({ loop: true });
 
     // Inicializa o Google Sign-In
     globalThis.google.accounts.id.initialize({

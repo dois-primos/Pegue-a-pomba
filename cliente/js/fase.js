@@ -197,6 +197,10 @@ export default class fase extends Phaser.Scene {
   }
 
   criarProximaRevoada() {
+    this.passaros.clear(true, true);
+    this.totalPassarosGerados = 0;
+    this.criarRevoadaInicial();
+
     this.passaros.children.iterate((passaro) => {
       const backgroundY = 190;
       const backgroundHeight = 380;
@@ -239,10 +243,17 @@ export default class fase extends Phaser.Scene {
       JSON.stringify({
         cena: this.game.cenaAtual,
         tiros: 10,
+        passaros: this.passaros.children.entries.map((p) => ({
+          x: p.x,
+          y: p.y,
+          texture: p.texture.key,
+          frame: p.frame.name,
+          visible: p.visible,
+          direcao: p.direcao,
+        })),
       })
     );
   }
-
   receberDados(event) {
     const dados = JSON.parse(event.data);
 
@@ -265,12 +276,14 @@ export default class fase extends Phaser.Scene {
           p.setVisible(passaro.visible);
           p.direcao = passaro.direcao;
 
-          if (!p.anims.isPlaying && p.visible) {
-            const anim =
-              p.direcao === 1
-                ? "voar-direita-" + p.texture.key
-                : "voar-esquerda-" + p.texture.key;
+          const anim =
+            p.direcao === 1
+              ? "voar-direita-" + p.texture.key
+              : "voar-esquerda-" + p.texture.key;
+          if (p.visible) {
             p.anims.play(anim, true);
+          } else {
+            p.anims.stop();
           }
         });
       }
@@ -574,7 +587,7 @@ export default class fase extends Phaser.Scene {
     }
     // Verifica se o jogador 1 venceu
     if (this.game.jogadores.primeiro === this.game.socket.id) {
-      if (this.score >= 1000) {
+      if (this.score >= 2000) {
         this.game.dadosJogo.send(
           JSON.stringify({
             proximaFase: "gameover",
