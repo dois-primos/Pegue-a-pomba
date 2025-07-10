@@ -1,6 +1,6 @@
 # 🎯 Pegue a pomba - Phaser Game
 
-Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3](https://phaser.io/phaser3). O jogador controla uma mira usando um controle (gamepad) e deve acertar os pássaros na tela com um número limitado de tiros por rodada.
+Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3](https://phaser.io/phaser3). Os jogadores controlam uma mira usando um controle (Joystick) e devem acertar os pássaros na tela com um número limitado de tiros por rodada, quem atingir a pontução máxima primeiro, ganha!
 
 ---
 
@@ -15,8 +15,7 @@ Este é um jogo simples inspirado no jogo Duck Hunt, desenvolvido com [Phaser 3]
 - Use o JoyStick do controle para mover a mira.
 - Aperte o botão de tiro para atirar.
 - Você tem tiros limitados por rodada.
-- A rodada termina quando os tiros acabam e todos os pássaros saem da tela.
-- O jogo mostra a pontuação e reinicia automaticamente uma nova rodada.
+- O jogo termina quando um dos jogadores atingir a pontuação máxima o mais rápido que conseguirem.
 
 ---
 

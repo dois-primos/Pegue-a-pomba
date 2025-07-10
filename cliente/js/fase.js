@@ -136,11 +136,11 @@ export default class fase extends Phaser.Scene {
       fontSize: "32px",
       fill: "#fff",
     });
-    this.scoreRemotoText = this.add.text(560, 16, "Adversário: 0", {
+    this.scoreRemotoText = this.add.text(540, 16, "Adversário: 0", {
       fontSize: "28px",
       fill: "#fff",
     });
-    this.tirosText = this.add.text(16, 60, "Tiros: " + this.tirosRestantes, {
+    this.tirosText = this.add.text(16, 56, "Tiros: " + this.tirosRestantes, {
       fontSize: "28px",
       fill: "#fff",
     });
