@@ -5,7 +5,8 @@ export default class gameover extends Phaser.Scene {
     super("gameover");
   }
 
-  init() {
+  init(data) {
     this.game.cenaAtual = "gameover";
+    this.score = data.score || 0;
   }
 }

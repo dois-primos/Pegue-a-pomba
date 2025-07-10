@@ -238,6 +238,7 @@ export default class fase extends Phaser.Scene {
 
   receberDados(event) {
     const dados = JSON.parse(event.data);
+
     if (dados.cena === this.game.cenaAtual) {
       if (dados.personagem && this.personagemRemoto) {
         this.personagemRemoto.x = dados.personagem.x;
@@ -281,6 +282,11 @@ export default class fase extends Phaser.Scene {
       if (dados.novoScore) {
         this.scoreRemoto = dados.novoScore;
         this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
+      }
+
+      if (dados.proximaFase) {
+        this.scene.stop();
+        this.scene.start(dados.proximaFase, { score: this.score });
       }
     }
   }
@@ -353,13 +359,6 @@ export default class fase extends Phaser.Scene {
           Phaser.Math.Between(50, 80) * passaro.direcao,
           Phaser.Math.Between(-15, 15)
         );
-
-        // Se não quiser mais inverter sprite nem aplicar animação, remova as linhas abaixo:
-        // passaro.setFlipX(passaro.direcao === -1);
-        // passaro.anims.play(
-        //   passaro.direcao === 1 ? "voar-direita-f5" : "voar-esquerda-f5",
-        //   true
-        // );
       });
     });
   }
@@ -564,20 +563,14 @@ export default class fase extends Phaser.Scene {
     // Verifica se o jogador 1 venceu
     if (this.game.jogadores.primeiro === this.game.socket.id) {
       if (this.score >= 1000) {
-        this.game.socket.emit("proxima-fase", {
-          fase: "finalfeliz",
-          score: this.score,
-        });
-      }
-    }
+        this.game.dadosJogo.send(
+          JSON.stringify({
+            proximaFase: "gameover",
+          })
+        );
 
-    // Verifica se o jogador 2 venceu
-    else if (this.game.jogadores.segundo === this.game.socket.id) {
-      if (this.scoreRemoto >= 1000) {
-        this.game.socket.emit("proxima-fase", {
-          fase: "finalfeliz",
-          score: this.scoreRemoto,
-        });
+        this.scene.stop();
+        this.scene.start("finalfeliz", { score: this.score });
       }
     }
   }
