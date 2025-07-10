@@ -83,7 +83,7 @@ export default class fase2 extends Phaser.Scene {
       const passaro = this.passaros.create(x, y, tipoPassaro);
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
-        Phaser.Math.Between(-80, 80),
+        Phaser.Math.Between(-80, 80)
       );
       passaro.direcao = direcao;
       passaro.setFlipX(direcao === -1);
@@ -145,11 +145,11 @@ export default class fase2 extends Phaser.Scene {
       this.passaros.children.entries.forEach((passaro) => {
         passaro.setVelocity(
           Phaser.Math.Between(50, 80) * passaro.direcao,
-          Phaser.Math.Between(-15, 15),
+          Phaser.Math.Between(-15, 15)
         );
         passaro.anims.play(
           passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
-          true,
+          true
         );
       });
     });
@@ -196,7 +196,7 @@ export default class fase2 extends Phaser.Scene {
       this.passaros.getChildren().forEach((passaro) => {
         const colidiu = Phaser.Geom.Intersects.RectangleToRectangle(
           this.mira.getBounds(),
-          passaro.getBounds(),
+          passaro.getBounds()
         );
 
         if (

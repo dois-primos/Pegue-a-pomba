@@ -143,47 +143,46 @@ export default class fase4 extends Phaser.Scene {
         }
       });
     });
-  
 
-  const isPrimeiro = this.game.jogadores.primeiro === this.game.socket.id;
-  const isSegundo = this.game.jogadores.segundo === this.game.socket.id;
+    const isPrimeiro = this.game.jogadores.primeiro === this.game.socket.id;
+    const isSegundo = this.game.jogadores.segundo === this.game.socket.id;
 
-  if (isPrimeiro) {
-    this.configurarPrimeiroJogador();
-  } else if (isSegundo) {
-    this.configurarSegundoJogador();
+    if (isPrimeiro) {
+      this.configurarPrimeiroJogador();
+    } else if (isSegundo) {
+      this.configurarSegundoJogador();
+    }
   }
-}
 
-configurarPrimeiroJogador = () => {
-  this.personagemLocal = this.physics.add
-    .sprite(225, 225, "mira")
-    .setCollideWorldBounds(true);
-  this.personagemRemoto = this.add.sprite(700, -150, "mira-remoto");
+  configurarPrimeiroJogador = () => {
+    this.personagemLocal = this.physics.add
+      .sprite(225, 225, "mira")
+      .setCollideWorldBounds(true);
+    this.personagemRemoto = this.add.sprite(700, -150, "mira-remoto");
 
-  this.iniciarContagem(() => {
-    this.passaros.children.entries.forEach((passaro) => {
-      passaro.setVelocity(
-        Phaser.Math.Between(50, 80) * passaro.direcao,
-        Phaser.Math.Between(-15, 15),
-      );
-      passaro.anims.play(
-        passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
-        true,
-      );
+    this.iniciarContagem(() => {
+      this.passaros.children.entries.forEach((passaro) => {
+        passaro.setVelocity(
+          Phaser.Math.Between(50, 80) * passaro.direcao,
+          Phaser.Math.Between(-15, 15)
+        );
+        passaro.anims.play(
+          passaro.direcao === 1 ? "voar-direita-f1" : "voar-esquerda-f1",
+          true
+        );
+      });
     });
-  });
-};
+  };
 
-configurarSegundoJogador = () => {
-  this.personagemLocal = this.physics.add
-    .sprite(700, 100, "mira")
-    .setCollideWorldBounds(true);
-  this.personagemRemoto = this.add.sprite(100, 100, "mira-remoto");
-  this.iniciarContagem();
-};
+  configurarSegundoJogador = () => {
+    this.personagemLocal = this.physics.add
+      .sprite(700, 100, "mira")
+      .setCollideWorldBounds(true);
+    this.personagemRemoto = this.add.sprite(100, 100, "mira-remoto");
+    this.iniciarContagem();
+  };
 
-  iniciarContagem (callback) {
+  iniciarContagem(callback) {
     this.contador = this.add
       .text(400, 200, "5", {
         fontSize: "128px",
