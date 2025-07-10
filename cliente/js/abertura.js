@@ -36,15 +36,17 @@ export default class abertura extends Phaser.Scene {
       .setInteractive()
       .on("pointerdown", () => {
         this.scene.stop();
-        this.scene.start("sala");
+        this.scene.start("precarregamento");
       });
 
     this.input.gamepad.on("down", (pad) => {
       if (pad.buttons[9].pressed) {
         this.scene.stop();
-        this.scene.start("sala");
+        this.scene.start("precarregamento");
       }
     });
+
+    this.scene.start("precarregamento");
   }
   update() {}
 }

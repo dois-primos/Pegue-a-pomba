@@ -179,7 +179,6 @@ export default class fase extends Phaser.Scene {
     const passaro = this.passaros.create(x, y, tipoPassaro);
 
     const atraso = Math.random() * 5000;
-    console.log(atraso);
     setTimeout(() => {
       passaro.setVelocity(
         Phaser.Math.Between(100, 150) * direcao,
@@ -211,7 +210,6 @@ export default class fase extends Phaser.Scene {
       passaro.x = x;
 
       const atraso = Math.random() * 5000;
-      console.log(atraso);
       setTimeout(() => {
         passaro.setVelocity(
           Phaser.Math.Between(100, 150) * direcao,
@@ -230,10 +228,19 @@ export default class fase extends Phaser.Scene {
             ? "voar-direita-" + passaro.texture.key
             : "voar-esquerda-" + passaro.texture.key;
         passaro.anims.play(animacao, true);
-      }
 
-      this.tirosRestantes = 10;
+        passaro.setVisible(true);
+      }
     });
+
+    this.tirosRestantes += 10;
+    this.tirosText.setText("Tiros: " + this.tirosRestantes);
+    this.game.dadosJogo.send(
+      JSON.stringify({
+        cena: this.game.cenaAtual,
+        tiros: 10,
+      })
+    );
   }
 
   receberDados(event) {
@@ -282,6 +289,11 @@ export default class fase extends Phaser.Scene {
       if (dados.novoScore) {
         this.scoreRemoto = dados.novoScore;
         this.scoreRemotoText.setText("Adversário: " + this.scoreRemoto);
+      }
+
+      if (dados.tiros) {
+        this.tirosRestantes += dados.tiros;
+        this.tirosText.setText("Tiros: " + this.tirosRestantes);
       }
 
       if (dados.proximaFase) {
