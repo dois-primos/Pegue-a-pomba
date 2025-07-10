@@ -45,11 +45,6 @@ export default class abertura extends Phaser.Scene {
         this.scene.start("sala");
       }
     });
-
-    /*setTimeout(() => {
-      this.scene.stop();
-      this.scene.start("sala");
-    }, 100);*/
   }
   update() {}
 }

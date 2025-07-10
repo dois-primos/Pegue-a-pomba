@@ -16,12 +16,11 @@ export default class sala extends Phaser.Scene {
     this.game.sala = 1;
     this.game.socket.emit("entrar-na-sala", globalThis.game.sala);
 
-    // Escutar resposta do servidor para iniciar a fase
     this.game.socket.on("jogadores", (jogadores) => {
       if (jogadores.segundo) {
         this.game.jogadores = jogadores;
         this.scene.stop("sala");
-        this.scene.start("fase5");
+        this.scene.start("fase");
       }
     });
   }

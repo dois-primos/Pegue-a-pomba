@@ -1,9 +1,8 @@
 /*global Phaser*/
 /*eslint no-undef: "error"*/
-
-export default class fase5 extends Phaser.Scene {
+export default class fase extends Phaser.Scene {
   constructor() {
-    super("fase5");
+    super("fase");
     this.speed = 200;
     this.scoreRemoto = 0;
     this.tirosRestantes = 10;
@@ -14,7 +13,7 @@ export default class fase5 extends Phaser.Scene {
   }
 
   init(data) {
-    this.game.cenaAtual = "fase5";
+    this.game.cenaAtual = "fase";
     this.score = data.score || 0;
   }
 
